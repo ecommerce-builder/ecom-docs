@@ -1,3 +1,4 @@
+*.swp
 .firebase
 docs/.vuepress/dist/
 docs/.vuepress/public/downloads/mac/ecom
