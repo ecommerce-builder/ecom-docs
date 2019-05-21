@@ -1,3 +1,6 @@
 .firebase
 docs/.vuepress/dist/
+docs/.vuepress/public/downloads/mac/ecom
+docs/.vuepress/public/downloads/linux/ecom
+docs/.vuepress/public/downloads/windows/ecom.exe
 node_modules/
