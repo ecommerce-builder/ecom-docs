@@ -1,0 +1,3 @@
+.firebase
+docs/.vuepress/dist/
+node_modules/
