@@ -1,25 +1,33 @@
 # Installation
 To install the command line tool, first open a terminal window on your PC or Mac. Follow the specific instructions for Mac, Windows or Linux below.
 
-## Mac <Badge text="v0.7.0"/> <Badge text="alpha" type="warn"/>
-[Download latest Mac binary](/downloads/mac/ecom)
+## Mac <Badge text="v0.9.0"/> <Badge text="alpha" type="warn"/>
+[Download latest Mac binary](/downloads/mac/ecom-v0.9.0-darwin)
 
-After you've downloaded the executable binary, modify the file permissions to make it executable before copying it to your system path.
+After you've downloaded the binary, rename the file, copy it to your system path and change the file permissions to make it executable.
 
-```bash
+
+``` bash
+mv ecom-v0.9.0-darwin ecom
 chmod +x ecom
-cp ./ecom /usr/local/bin/ecom
+sudo cp ./ecom /usr/local/bin/ecom
+eval "`ecom completion`"
 ```
 
-## Windows <Badge text="v0.7.0"/> <Badge text="alpha" type="warn"/>
-[Download latest Windows binary](/downloads/windows/ecom.exe)
+## Windows <Badge text="v0.9.0"/> <Badge text="alpha" type="warn"/>
+[Download latest Windows binary](/downloads/windows/ecom-v0.9.0.exe)
 
-## Linux <Badge text="v0.7.0"/> <Badge text="alpha" type="warn"/>
-[Download latest Linux binary](/downloads/linux/ecom)
+Rename the file to be `ecom.exe` and drag and drop this to a folder on your system path.
 
-After you've downloaded the executable binary, modify the file permissions to make it executable before copying it to your system path.
+## Linux <Badge text="v0.9.0"/> <Badge text="alpha" type="warn"/>
+[Download latest Linux binary](/downloads/linux/ecom-v0.9.0-linux)
 
-```bash
+After you've downloaded the binary, rename the file, copy it to your system path and change the file permissions to make it executable.
+
+
+``` bash
+mv ecom-v0.9.0-linux ecom
 chmod +x ecom
-cp ./ecom /usr/local/bin/ecom
+sudo cp ./ecom /usr/local/bin/ecom
+eval "`ecom completion`"
 ```

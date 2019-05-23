@@ -5,13 +5,13 @@ Commands are organised into several groups; [catalog](#catalog), [associations](
 
 ## Catalog
 ### catalog [command]
-The `catalog` group of commands are used to manage the catalog hierarchy. Use the appropriate subcommand [catalog apply](#catalog-apply) to replace the catalog hierarchy, [catalog get](#catalog-get) to get the existing catalog tree or [catalog purge](#catalog-purge) to purge the existing catalog hierarchy.
+The `catalog` group of commands are used to manage the catalog hierarchy. Use subcommand [catalog apply](#catalog-apply) to replace the catalog hierarchy, [catalog get](#catalog-get) to get the existing catalog tree or [catalog purge](#catalog-purge) to purge the existing catalog hierarchy.
 
 
-Run without a subcommand, `catalog` will show all available subcommands with a summary.
+Without a subcommand, `catalog` will show a summary of available subcommands.
 
 #### Example
-```sh
+``` bash
 Catalog management
 
 Usage:
@@ -32,7 +32,7 @@ Use "ecom catalog [command] --help" for more information about a command.
 Retrieve a tree view of the current catalog hierarchy.
 
 #### Example
-```sh
+``` bash
 $ ecom catalog get
 Spy
 ├── Spy Cameras
@@ -78,17 +78,24 @@ Spy
      └── Accessories
 ```
 
+
 ### catalog purge
 Purges the existing catalog. You must purge the associations first before running this command. See the [assocs purge](#assocs-purge) command.
 
+
 ## Associations
+
+
 ### assocs [command]
 The `assocs` group of commands are used to manage catalog associations. Use the appropriate subcommand [assocs apply](#assocs-apply) to replace the associations with new, [assocs list](#assocs-list) to list the existing associations or [assocs purge](#assoc-purge) to purge all existing associations.
 
 Run without a subcommand, `assocs` will show all available subcommands with a summary.
 
+
 #### Example
-```sh
+
+
+``` bash
 $ ecom assocs
 Associations management
 
@@ -106,18 +113,29 @@ Flags:
 Use "ecom assocs [command] --help" for more information about a command.
 ```
 
+
 ### assocs apply &lt;associations.yaml&gt;
+
+
 This command processes the associations YAML file from the local filesystem and assoicates the products to their destination categories.
 
 
 ### assocs purge
+
+
 Purges the existing associations.
 
 
 ## Products
+
+
 ### products [command]
+
+
 #### Example
-```sh
+
+
+``` bash
 Products management
 
 Usage:
@@ -134,32 +152,48 @@ Flags:
 Use "ecom products [command] --help" for more information about a command.
 ```
 
+
 ### products apply &lt;product.yaml&gt;
+
+
 ### products delete &lt;sku&gt;
+
+
 ### products get &lt;sku&gt;
 Retrieve product details for the product withthe specified SKU.
+
 
 ### version
 Shows the version of the command line tool. To find out information about the API service use the [sysinfo](#sysinfo) command.
 
+
 #### Example
-```sh
+
+
+``` bash
 $ ecom version
-v0.7.0
+v0.9.0
 $
 
 ```
+
+
 ### sysinfo
+
+
 Shows information about the running system including API version, backing Postgres database and Google project details.
 
 This command is useful for administrators that wish to check the ecom system is configured correctly.
 
+
 #### Example
-```sh
+
+
+``` bash
 $ ecom sysinfo
 API Service                                                       
 -----------                                                       
-Version      v0.34.0                                              
+Version      v0.34.1
                                                                   
 Postgres                                                          
 --------                                                          
