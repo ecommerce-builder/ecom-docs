@@ -5,6 +5,17 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "headers": [
+      {
+        "source": "**/installation.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-ago=0, no-cache"
+          }
+        ]
+      }
     ]
   }
 }
