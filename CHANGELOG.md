@@ -1,4 +1,7 @@
 # CHANGELOG
+## 0.2.0 (Wed 29 May 2019)
++ Add Ecom JS Client README first draft.
+
 ## 0.1.1 (Tue 23 May 2019)
 + `Cache-Control: "max-ago=0, no-cache"` for any installation.html page.
 
