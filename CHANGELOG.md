@@ -1,4 +1,7 @@
 # CHANGELOG
+## 0.2.1 (Wed 29 May 2019)
++ Move misplaced README.md from cli-tool to jsclient.
+
 ## 0.2.0 (Wed 29 May 2019)
 + Add Ecom JS Client README first draft.
 
