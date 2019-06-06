@@ -1,4 +1,7 @@
 # CHANGELOG
+## 0.2.4 (Thu 6 Jun 2019)
++ Expand description of YAML file formats.
+
 ## 0.2.3 (Wed 29 May 2019)
 + Fixed broken markdown links.
 
