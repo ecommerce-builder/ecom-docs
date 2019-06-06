@@ -95,7 +95,7 @@ let client = new EcomClient({
 ```
 
 
-For a more detailed explanation read the Firebase documentation for (`signInWithEmailAndPassword`)[https://firebase.google.com/docs/reference/node/firebase.auth.Auth#sign-inwith-email-and-password].
+For a more detailed explanation read the Firebase documentation for [`signInWithEmailAndPassword`](https://firebase.google.com/docs/reference/node/firebase.auth.Auth#sign-inwith-email-and-password).
 
 
 ### Set an authentication state observer and get customer data
@@ -232,4 +232,4 @@ category.products
 
 ## More Information
 
-View the (source code for the Ecom JavaScript client library)[https://github.com/ecommerce-builder/ecom-js-client] or find instructions for installing the (npm package)[https://www.npmjs.com/package/@ecommerce-builder/ecom-js-client]. The source code is written in Typescript and compiled to ES5. Common JS, ES Module packages are both available as well as UMD brower builds.
+View the [source code for the Ecom JavaScript client library](https://github.com/ecommerce-builder/ecom-js-client) or find instructions for installing the [npm package](https://www.npmjs.com/package/@ecommerce-builder/ecom-js-client). The source code is written in Typescript and compiled to ES5. Common JS, ES Module packages are both available as well as UMD brower builds.

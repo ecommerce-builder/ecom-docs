@@ -1,4 +1,10 @@
 # CHANGELOG
+## 0.2.3 (Wed 29 May 2019)
++ Fixed broken markdown links.
+
+## 0.2.2 (Wed 29 May 2019)
++ Broken tag
+
 ## 0.2.1 (Wed 29 May 2019)
 + Move misplaced README.md from cli-tool to jsclient.
 
