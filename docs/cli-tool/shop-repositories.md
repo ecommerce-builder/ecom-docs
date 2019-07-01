@@ -12,7 +12,7 @@ The `catalog.yaml` and `associations.yaml` files live in the root directory of t
 
 All product YAML files are held in a directory named `products` within the root directory. The `README.md` is optional and can be used for your own purposes.
 
-```sh
+```bash
 .
 ├── associations.yaml
 ├── catalog
