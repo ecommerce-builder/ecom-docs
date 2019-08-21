@@ -1,4 +1,8 @@
 # CHANGELOG
+## 0.4.0 (Wed 21 Aug 2019)
++ Client SDK Library now includes admin functions. To be written.
++ Updated documentation for price list methods.
+
 ## 0.3.0 (Mon 1 Jul 2019)
 + Update download references to `v0.13.1` cli tool.
 

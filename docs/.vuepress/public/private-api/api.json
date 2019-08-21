@@ -1,0 +1,3737 @@
+{
+  "openapi": "3.0.2",
+  "servers": [
+    {
+      "description": "Ecom Test API Service (GAE)",
+      "url": "https://open247-gae.appspot.com"
+    },
+    {
+      "description": "Ecom Test API Service",
+      "url": "http://localhost:8080"
+    },
+    {
+      "description": "Ecom Test API Service Ngrok",
+      "url": "https://a7c46957.ngrok.io"
+    }
+  ],
+  "info": {
+    "description": "# Ecom API\nMost requests require a JSON Web Token (JWT) aquired by signing into the Firebase Auth that corresponds to the API endpoint.\n\n## Authentication\nAPI resources are protected by levels of access:\n\n  * None (No JWT required)\n  * `RoleShopper` (JWT contains no custom `role` claim)\n  * `RoleCustomer` (JWT contains a custom claim `\"role\": \"customer\"`)\n  * `RoleAdmin` (JWT contains a custom claim `\"role\": \"admin\"`)\n  * `RoleSuperUser` (JWT contains a custom claim `\"role\": \"root\"`)\n\nSet the `Authorization: Bearer $JWT` header before calling the API endpoints that require authentication.\n",
+    "version": "v0.57.0-dev-1809",
+    "title": "Headless Ecommerce API",
+    "contact": {
+      "name": "Andy Fusniak",
+      "email": "andy@andyfusniak.com"
+    }
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Health Check",
+        "operationId": "OpHealthCheck1",
+        "tags": [
+          "Misc"
+        ],
+        "responses": {
+          "200": {
+            "description": "Heartbeat",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "ok"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/healthz": {
+      "get": {
+        "summary": "Health Check",
+        "operationId": "OpHealthCheck2",
+        "tags": [
+          "Misc"
+        ],
+        "responses": {
+          "200": {
+            "description": "Heartbeat",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "ok"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/config": {
+      "get": {
+        "summary": "Get config object",
+        "description": "GetSystemConfig requires no JSON Web Token.\n",
+        "operationId": "GetSystemConfig",
+        "tags": [
+          "Misc"
+        ],
+        "responses": {
+          "200": {
+            "description": "System Config object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemConfig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/carts": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create a new shopping cart",
+        "description": "OpCreateCart requires `RoleShopper` privileges. Creates an empty shopping cart. A shopping cart consists of items, discounts and coupons. The request body contains a unique identifier for the new cart.\n",
+        "operationId": "OpCreateCart",
+        "tags": [
+          "Carts"
+        ],
+        "responses": {
+          "201": {
+            "description": "cart object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cart"
+                },
+                "example": {
+                  "object": "cart",
+                  "id": "30ad2997-3d19-4001-88d9-e2568d8cf720",
+                  "locked": false,
+                  "created": "2019-08-02T12:02:42.217936Z",
+                  "modified": "2019-08-02T12:02:42.217936Z'",
+                  "items": {
+                    "object": "list",
+                    "data": []
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/carts/{cart_id}": {
+      "parameters": [
+        {
+          "name": "cart_id",
+          "required": true,
+          "in": "path",
+          "description": "Cart ID",
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "30ad2997-3d19-4001-88d9-e2568d8cf720"
+          }
+        }
+      ],
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get a shoping cart including items, offers and coupons",
+        "description": "OpGetCart requires `RoleShopper` privileges. Retrives an existing shopping cart with the given cart ID.\n",
+        "tags": [
+          "Carts"
+        ],
+        "responses": {
+          "200": {
+            "description": "Cart object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cart"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The cart with the given cart_id could not be found.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": ""
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/carts/{cart_id}/items": {
+      "parameters": [
+        {
+          "name": "cart_id",
+          "required": true,
+          "in": "path",
+          "description": "Cart ID",
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "30ad2997-3d19-4001-88d9-e2568d8cf720"
+          }
+        }
+      ],
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Add an item to a cart",
+        "description": "OpAddItemToCart requires `RoleShopper` privileges. Adds a new item to the cart returning the cart_item object. Each item has a unique identifier.\n",
+        "operationId": "OpAddItemToCart",
+        "tags": [
+          "Carts"
+        ],
+        "requestBody": {
+          "description": "New CartItem",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "product_id",
+                  "qty"
+                ],
+                "properties": {
+                  "product_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "54bfd164-b31a-4e61-b715-9c1cbe3c18e3"
+                  },
+                  "qty": {
+                    "type": "integer",
+                    "example": 2
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "`CartItem` object\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The cart with cart_id in the path could not be found. You should first create a cart calling the `OpCreateCart` operation and use its cart_id.\n",
+            "content": {
+              "application/json": {
+                "example": ""
+              }
+            }
+          },
+          "409": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "cart/cart-item-already-exists": {
+                    "summary": "cart/cart-item-already-exists",
+                    "value": {
+                      "status": 409,
+                      "code": "cart/cart-item-already-exists",
+                      "message": "cart item already exists in the cart"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get cart items",
+        "description": "OpGetCartItems requires `RoleShopper` privileges.\n",
+        "operationId": "OpGetCartItems",
+        "tags": [
+          "Carts"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of cart item objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CartItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The cart with cart_id in the path could not be found. You should first create a cart calling the `OpCreateCart` operation and use its cart_id.\n",
+            "content": {
+              "application/json": {
+                "example": ""
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Empty the entire cart",
+        "description": "OpEmptyCartItems requires `RoleShopper` privileges.\n",
+        "operationId": "OpEmptyCartItems",
+        "tags": [
+          "Carts"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "cart/cart-contains-no-items": {
+                    "summary": "cart/cart-contains-no-items",
+                    "value": {
+                      "status": 409,
+                      "code": "cart/cart-contains-no-items",
+                      "message": "OpEmptyCartItems cannot be called if a cart contains no items"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/carts/{cart_id}/items/{cart_item_id}": {
+      "parameters": [
+        {
+          "name": "cart_id",
+          "required": true,
+          "in": "path",
+          "description": "A unique identifier for the cart.",
+          "schema": {
+            "type": "string",
+            "example": "30ad2997-3d19-4001-88d9-e2568d8cf720"
+          }
+        },
+        {
+          "name": "cart_item_id",
+          "required": true,
+          "in": "path",
+          "description": "A unique identifier for the cart item.",
+          "schema": {
+            "type": "string",
+            "example": "aba8b505-d016-4afc-95bd-1f292ed5a915"
+          }
+        }
+      ],
+      "patch": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update a cart item with a new quantity",
+        "description": "OpUpdateCartItem requires `RoleShopper` privileges.\n",
+        "operationId": "OpUpdateCartItem",
+        "tags": [
+          "Carts"
+        ],
+        "requestBody": {
+          "description": "New quantity for cart item",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "qty"
+                ],
+                "properties": {
+                  "qty": {
+                    "type": "integer",
+                    "example": 3
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "CartItem object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartItem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete a cart item",
+        "description": "OpDeleteCartItem requires `RoleShopper` privileges.\n",
+        "operationId": "OpDeleteCartItem",
+        "tags": [
+          "Carts"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/discounts": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create a new discount offer",
+        "description": "OpCreateDiscount requires `RoleAdmin` privileges.\n",
+        "operationId": "OpCreateDiscount",
+        "tags": [
+          "Discounts"
+        ],
+        "responses": {
+          "201": {
+            "description": "Discount object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Discount"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List all discounts",
+        "description": "OpListDiscounts requires `RoleAdmin` privileges.\n",
+        "tags": [
+          "Discounts"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of Discount objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Discount"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/discounts/{discount_id}": {
+      "parameters": [
+        {
+          "name": "discount_id",
+          "required": true,
+          "in": "path",
+          "description": "A unique identifier for the discount.",
+          "schema": {
+            "type": "string",
+            "example": "20574b05-29a4-49f6-bf89-fe231c09d8a5"
+          }
+        }
+      ],
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get a discount object by `discount_id`",
+        "description": "OpGetDiscount requires `RoleAdmin` privileges.\n",
+        "tags": [
+          "Discounts"
+        ],
+        "responses": {
+          "200": {
+            "description": "Discount object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Discount"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update a discount offer",
+        "description": "OpUpdateDiscount requires `RoleAdmin` privileges.\n",
+        "tags": [
+          "Discounts"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscountUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Discount object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Discount"
+                },
+                "example": {
+                  "type": {
+                    "object": "discount",
+                    "id": "391c499e-5e58-430a-8d92-a8587cbc3517",
+                    "discount_code": "AUG20",
+                    "type": "percentage",
+                    "start_at": "2019-08-05 09:00:00.000000Z",
+                    "ends_at": "2019-08-08 18:00:00.000000Z",
+                    "amount": 200000,
+                    "name": "August Deals",
+                    "created": "2019-07-30 14:23:31.756204Z",
+                    "modified": "2019-07-04 11:45:28.237506Z"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete a discount offer",
+        "description": "OpDeleteDiscount requires `RoleAdmin` privileges.\n",
+        "tags": [
+          "Discounts"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/products/{product_id}/discounts": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Apply a discount code to an individual product",
+        "description": "OpApplyProductDiscount requires `RoleAdmin` privileges. The request body contains a `discount_code` that references the code returned when creating a new Discount object.\n",
+        "operationId": "OpApplyProductDiscount",
+        "tags": [
+          "Discounts"
+        ],
+        "parameters": [
+          {
+            "name": "product_id",
+            "required": true,
+            "in": "path",
+            "description": "Product SKU",
+            "schema": {
+              "type": "string",
+              "example": "TV-SKU"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscountApplyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Not Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/coupons": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create a new coupon offer",
+        "description": "OpCreateCoupon requires `RoleAdmin` privileges.\n",
+        "operationId": "OpCreateCoupon",
+        "tags": [
+          "Coupons"
+        ],
+        "responses": {
+          "501": {
+            "description": "Not Implemented"
+          }
+        }
+      }
+    },
+    "/catagories/{category_id}/discounts": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Apply a discount code to a bottom level category",
+        "description": "OpApplyCategoryDiscount requires `RoleAdmin` privileges. The request body contains a `discount_code` that references the code returned when creating a new Discount object.\n",
+        "operationId": "OpApplyCategoryDiscount",
+        "tags": [
+          "Discounts"
+        ],
+        "parameters": [
+          {
+            "name": "category_id",
+            "required": true,
+            "in": "path",
+            "description": "Category ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "0baf0ae0-ef99-4200-822d-341f44b79b3f"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscountApplyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "discount/discount-applied-to-non-leaf-category": {
+                    "summary": "discount/discount-applied-to-non-leaf-category",
+                    "value": {
+                      "status": 409,
+                      "code": "discount/discount-applied-to-non-leaf-category",
+                      "message": "discounts can only be applied to leaf categories"
+                    }
+                  },
+                  "discount/discount-leaf-category-zero-products": {
+                    "summary": "discount/discount-leaf-category-zero-products",
+                    "value": {
+                      "status": 409,
+                      "code": "discount/discount-leaf-category-zero-products",
+                      "message": "discounts can only be applied to leaf categories containing products"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admins": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create a new administrator",
+        "description": "OpCreateAdmin requires `RoleAdmin` privileges.\n",
+        "operationId": "OpCreateAdmin",
+        "tags": [
+          "Admins"
+        ],
+        "requestBody": {
+          "description": "New administrator details",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "A customer object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List all administrators",
+        "description": "OpListAdmins requires `RoleAdmin` privileges.\n",
+        "operationId": "OpListAdmins",
+        "tags": [
+          "Admins"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of customer objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Customer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admins/{admin_id}": {
+      "parameters": [
+        {
+          "name": "admin_id",
+          "required": true,
+          "in": "path",
+          "description": "A unique identifier for the administrator.",
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "2d8661d3-0fac-4b72-8219-90731fb1935d"
+          }
+        }
+      ],
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete an administrator",
+        "description": "OpDeleteAdmin requires `RoleSuperUser` privileges.\n",
+        "operationId": "OpDeleteAdmin",
+        "tags": [
+          "Admins"
+        ],
+        "responses": {
+          "204": {
+            "description": "No content"
+          }
+        }
+      }
+    },
+    "/customers": {
+      "post": {
+        "summary": "Sign up a new customer",
+        "description": "Sign up a new customer creates a new customer with the role of `RoleCustomer`.\n### Auth\nOpCreateCustomer requires no JSON Web Token.\n",
+        "operationId": "OpCreateCustomer",
+        "tags": [
+          "Customers"
+        ],
+        "requestBody": {
+          "description": "New customer details",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Customer object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List all customers",
+        "description": "OpListCustomers requires `RoleAdmin` privileges.\n",
+        "operationId": "OpListCustomers",
+        "tags": [
+          "Customers"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of Customer objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Customer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/categories": {
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Replace all categories",
+        "description": "OpUpdateCatalog requires `RoleAdmin` privileges.\n",
+        "operationId": "OpUpdateCatalog",
+        "tags": [
+          "Categories"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryRequest"
+              },
+              "example": {
+                "segment": "a",
+                "name": "ประเภท A",
+                "categories": [
+                  {
+                    "segment": "b",
+                    "name": "ประเภท B",
+                    "categories": [
+                      {
+                        "segment": "e",
+                        "name": "ประเภท E",
+                        "categories": []
+                      }
+                    ]
+                  },
+                  {
+                    "segment": "c",
+                    "name": "ประเภท C",
+                    "categories": [
+                      {
+                        "segment": "f",
+                        "name": "ประเภท F",
+                        "categories": [
+                          {
+                            "segment": "i",
+                            "name": "ประเภท I",
+                            "categories": []
+                          },
+                          {
+                            "segment": "j",
+                            "name": "ประเภท J",
+                            "categories": [
+                              {
+                                "segment": "m",
+                                "name": "ประเภท M",
+                                "categories": []
+                              },
+                              {
+                                "segment": "n",
+                                "name": "ประเภท N",
+                                "categories": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "segment": "g",
+                        "name": "ประเภท G",
+                        "categories": []
+                      }
+                    ]
+                  },
+                  {
+                    "segment": "d",
+                    "name": "ประเภท D",
+                    "categories": [
+                      {
+                        "segment": "h",
+                        "name": "ประเภท H",
+                        "categories": [
+                          {
+                            "segment": "k",
+                            "name": "ประเภท K",
+                            "categories": []
+                          },
+                          {
+                            "segment": "l",
+                            "name": "ประเภท L",
+                            "categories": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "cart/cart-item-already-exists": {
+                    "summary": "cart/cart-item-already-exists",
+                    "value": {
+                      "status": 409,
+                      "code": "cart/cart-item-already-exists",
+                      "message": "cart item already exists in the cart"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get all categories",
+        "description": "OpGetCatalog requires `RoleShopper` privileges.\n",
+        "operationId": "OpGetCatalog",
+        "tags": [
+          "Categories"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Categories"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Purge all categories",
+        "description": "OpPurgeCatalog requires `RoleAdmin` privileges.\n",
+        "operationId": "OpPurgeCatalog",
+        "tags": [
+          "Categories"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/categories/assocs/products": {
+      "put": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Keyed-By",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "id",
+                "path"
+              ],
+              "default": "path"
+            },
+            "required": false,
+            "description": "Indicates that the request body keys are either category `id` or category `path` values. If the header is not set the default expected request body is expected to be keyed by category `id`."
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Replace all category to product associations",
+        "description": "The request body is a map of string to object values. The key of this map is either a category id or a category path, determined by setting the `X-Keyed-By` header to `id` or `path` respectively.\n\n`X-Keyed-By: id` is currently not implemented and returns a 501 Not Implemented status code. You should use `X-Keyed-By: path` and pass category path strings as keys to the request body.\n\nTo get a list of all products, including product id and SKUs, use the OpListProducts operation.\n\nOpUpdateCatalogProductAssocs requires `RoleAdmin` privileges.\n",
+        "operationId": "OpUpdateCatalogProductAssocs",
+        "tags": [
+          "Associations"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssocProductIDRequest"
+              },
+              "example": {
+                "a/b/e": {
+                  "products": [
+                    {
+                      "product_id": "e0130bb0-5996-451f-95a0-e5c5afa207d7"
+                    },
+                    {
+                      "product_id": "60230435-5ad9-4a27-9b52-dec2944fdfb1"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutAssocsConflict"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "id",
+                "path"
+              ],
+              "default": "id"
+            },
+            "required": false,
+            "description": "Return the category to product associations keyed by either category `id` or category `path`."
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get all category to product associations",
+        "description": "OpGetCatalogProductAssocs requires `RoleShopper` privileges.\n",
+        "operationId": "OpGetCatalogProductAssocs",
+        "tags": [
+          "Associations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Associations object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Associations"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Purge all category to product associations",
+        "description": "OpPurgeCatalogAssocs requires `RoleAdmin` privileges.\n",
+        "operationId": "OpPurgeCatalogAssocs",
+        "tags": [
+          "Associations"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/customers/{customer_id}": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get a customer object",
+        "description": "OpGetCustomer requires `RoleCustomer` privileges.\n",
+        "operationId": "OpGetCustomer",
+        "tags": [
+          "Customers"
+        ],
+        "parameters": [
+          {
+            "name": "customer_id",
+            "required": true,
+            "in": "path",
+            "description": "Customer ID",
+            "schema": {
+              "type": "string",
+              "example": "53b3384b-fc35-47d1-9054-6b81f30f382e"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Customer object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customers/{customer_id}/devkeys": {
+      "parameters": [
+        {
+          "name": "customer_id",
+          "required": true,
+          "in": "path",
+          "description": "Customer ID",
+          "schema": {
+            "type": "string",
+            "example": "53b3384b-fc35-47d1-9054-6b81f30f382e"
+          }
+        }
+      ],
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Generate a new developer key",
+        "description": "OpGenerateCustomerDevKey requires `RoleCustomer` privileges.\n",
+        "operationId": "OpGenerateCustomerDevKey",
+        "tags": [
+          "Developer Keys"
+        ],
+        "responses": {
+          "201": {
+            "description": "Developer Key object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevKey"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List a customer's developer keys",
+        "description": "OpListCustomersDevKeys requires `RoleCustomer` privileges.\n",
+        "operationId": "OpListCustomersDevKeys",
+        "tags": [
+          "Developer Keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of Developer Key objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DevKey"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/devkeys/{dev_key_id}": {
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete a developer key",
+        "description": "OpDeleteCustomerDevKey requires `RoleAdmin` privileges.\n",
+        "operationId": "OpDeleteCustomerDevKey",
+        "tags": [
+          "Developer Keys"
+        ],
+        "parameters": [
+          {
+            "name": "dev_key_id",
+            "required": true,
+            "in": "path",
+            "description": "Developer Key ID",
+            "schema": {
+              "type": "string",
+              "example": "5a85466e-9f23-4d71-b8b7-adbfc479bb6c"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/signin-with-devkey": {
+      "post": {
+        "summary": "Signin with a developer key",
+        "description": "OpSignInWithDevKey requires no JWT Web Token.\n\nSignin with a secret developer key. After you receive the custom token in the response, pass it to Firebase Auth [signInWithCustomToken](https://firebase.google.com/docs/reference/node/firebase.auth.Auth#sign-inwith-custom-token) to sign in the user:\n\n\n```javascript\n  firebase.auth().signInWithCustomToken(token).catch(function(error) {\n    // Handle Errors here.\n    var errorCode = error.code;\n    var errorMessage = error.message;\n    // ...\n  });\n```\n\nTo sign out a user, call `signOut`:\n\n```javascript\n  firebase.auth().signOut().then(function() {\n    // Sign-out successful.\n  }).catch(function(error) {\n    // An error happened.\n  });\n```\n",
+        "operationId": "OpSignInWithDevKey",
+        "tags": [
+          "Developer Keys"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignInDevKeyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Custom Token object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignInDevKeyCustomToken"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customers/{customer_id}/addresses": {
+      "parameters": [
+        {
+          "name": "customer_id",
+          "required": true,
+          "in": "path",
+          "description": "Customer ID",
+          "schema": {
+            "type": "string",
+            "example": "7835fa6e-38de-4959-8838-c88ab3e073b3"
+          }
+        }
+      ],
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Add a new address for a given customer",
+        "description": "OpCreateAddress requires `RoleCustomer` privileges.\n",
+        "operationId": "OpCreateAddress",
+        "tags": [
+          "Addresses"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddressRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Address object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Address"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get all addresses for a given customer",
+        "description": "OpGetCustomersAddresses requires `RoleCustomer` privileges. Retrieves a list of Address objects for the given customer. If called with `RoleCustomer` you must be the customer you intend to retrieve the addresses for. If called with `RoleAdmin` you can retrieve a list of addresses for any customer.\n",
+        "operationId": "OpGetCustomersAddresses",
+        "tags": [
+          "Addresses"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of Address objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Address"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/addresses/{address_id}": {
+      "parameters": [
+        {
+          "name": "address_id",
+          "required": true,
+          "in": "path",
+          "description": "Address ID",
+          "schema": {
+            "type": "string",
+            "example": "e3afa4f4-c5de-4e0f-8c37-5be677cfde6a"
+          }
+        }
+      ],
+      "patch": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update an address",
+        "description": "OpUpdateAddress requires `RoleCustomer` privileges.\n",
+        "operationId": "OpUpdateAddress",
+        "tags": [
+          "Addresses"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddressRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Address object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Address"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get an address object",
+        "description": "OpGetAddress requires `RoleCustomer` privileges.\n",
+        "operationId": "OpGetAddress",
+        "tags": [
+          "Addresses"
+        ],
+        "responses": {
+          "200": {
+            "description": "Address object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Address"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete an address object",
+        "description": "OpDeleteAddress requires `RoleCustomer` privileges.\n",
+        "operationId": "OpDeleteAddress",
+        "tags": [
+          "Addresses"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/products/{product_id}/pricing": {
+      "parameters": [
+        {
+          "name": "product_id",
+          "required": true,
+          "in": "path",
+          "description": "A unique identifier for the product.",
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "d9da65ce-6f2c-42ae-8789-448f3053b185"
+          }
+        }
+      ],
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get tier pricings for a given product",
+        "description": "OpMapPricingByProductID requires `RoleShopper` privileges.\n",
+        "operationId": "OpMapPricingBySKU",
+        "tags": [
+          "Pricing"
+        ],
+        "responses": {
+          "200": {
+            "description": "PricingMap",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingMap"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{product_id}/images": {
+      "parameters": [
+        {
+          "name": "product_id",
+          "required": true,
+          "in": "path",
+          "description": "A unique identifier for the product.",
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "d9da65ce-6f2c-42ae-8789-448f3053b185"
+          }
+        }
+      ],
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Add an image to a product",
+        "description": "OpAddImage requires `RoleAdmin` privileges.\n",
+        "operationId": "OpAddImage",
+        "tags": [
+          "Images"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Image object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Image"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List product images",
+        "description": "OpListProductImages requires `RoleShopper` privileges.\n",
+        "operationId": "OpListProductImages",
+        "tags": [
+          "Images"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of Image objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Image"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete all product images for a given product SKU",
+        "description": "OpDeleteAllProductImages requires `RoleAdmin` privileges.\n",
+        "operationId": "OpDeleteAllProductImages",
+        "tags": [
+          "Images"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/images/{image_id}": {
+      "parameters": [
+        {
+          "name": "image_id",
+          "required": true,
+          "in": "path",
+          "description": "Image ID",
+          "schema": {
+            "type": "string",
+            "example": "390d6786-0ff7-43e7-844b-af816589a045"
+          }
+        }
+      ],
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get an image by image ID",
+        "description": "OpGetImage requires `RoleShopper` privileges.\n",
+        "operationId": "OpGetImage",
+        "tags": [
+          "Images"
+        ],
+        "responses": {
+          "200": {
+            "description": "Image object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Image"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete an image by Image ID",
+        "description": "OpDeleteImage requires `RoleAdmin` privileges.\n",
+        "operationId": "OpDeleteImage",
+        "tags": [
+          "Images"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/products/{product_id}": {
+      "parameters": [
+        {
+          "name": "product_id",
+          "required": true,
+          "in": "path",
+          "description": "A unique identifier for the product.",
+          "schema": {
+            "type": "string",
+            "example": "d9da65ce-6f2c-42ae-8789-448f3053b185"
+          }
+        }
+      ],
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update a product including images and pricing by product id",
+        "description": "OpUpdateProduct requires `RoleAdmin` privileges. OpUpdateProduct updates an existing product or returns a `404 Not Found` is the product is not found.\n",
+        "operationId": "OpUpdateProduct",
+        "tags": [
+          "Products"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get a product by product id",
+        "description": "OpGetProduct requires `RoleShopper` privileges.\n",
+        "operationId": "OpGetProduct",
+        "tags": [
+          "Products"
+        ],
+        "responses": {
+          "200": {
+            "description": "product object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          }
+        }
+      },
+      "head": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Check if a product exists",
+        "description": "OpProductExists requires `RoleShopper` privileges.\n",
+        "operationId": "OpProductExists",
+        "tags": [
+          "Products"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete a product by SKU",
+        "description": "OpDeleteProduct requires `RoleAdmin` privileges.\n",
+        "operationId": "OpDeleteProduct",
+        "tags": [
+          "Products"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/products": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create a new product",
+        "description": "OpCreateProduct requires `RoleAdmin` privileges.\n",
+        "operationId": "OpCreateProduct",
+        "tags": [
+          "Products"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List all products",
+        "description": "OpListProducts requires `RoleShopper` privileges.\n",
+        "operationId": "OpListProducts",
+        "tags": [
+          "Products"
+        ],
+        "responses": {
+          "200": {
+            "description": "Product object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ProductSlim"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pricing-tiers": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Add a new pricing tier",
+        "description": "OpCreateTier requires `RoleAdmin` privileges.\n",
+        "operationId": "OpCreateTier",
+        "tags": [
+          "Pricing"
+        ],
+        "responses": {
+          "501": {
+            "description": "Not Implemented"
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List all pricing tiers",
+        "description": "OpListPricingTiers required `RoleAdmin` privileges.\n",
+        "operationId": "OpListPricingTiers",
+        "tags": [
+          "Pricing"
+        ],
+        "responses": {
+          "200": {
+            "description": "list object containing pricing_tier objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PricingTier"
+                      }
+                    }
+                  },
+                  "example": {
+                    "object": "list",
+                    "data": [
+                      {
+                        "object": "pricing_tier",
+                        "id": "96459863-28ed-41a0-919d-90de39ca76e0",
+                        "tier_ref": "default",
+                        "title": "Default tier",
+                        "description": "Default pricing tier",
+                        "created": "2019-08-13T17:51:49.45419Z",
+                        "modified": "2019-08-13T17:51:49.45419Z"
+                      },
+                      {
+                        "object": "pricing_tier",
+                        "id": "23055d5e-e610-4f07-8f8e-b99929e4442b",
+                        "tier_ref": "goldfish",
+                        "title": "Small Wholesale Customer",
+                        "description": "Small company with turn over less than 10k",
+                        "created": "2019-08-13T17:51:54.380625Z",
+                        "modified": "2019-08-13T17:51:54.380625Z"
+                      },
+                      {
+                        "object": "pricing_tier",
+                        "id": "42a954d2-cbfe-4868-b713-319cfcb97b64",
+                        "tier_ref": "seabass",
+                        "title": "Medium-sized Customer",
+                        "description": "Medium-sized company with turn over less than 100k",
+                        "created": "2019-08-13T17:51:54.382624Z",
+                        "modified": "2019-08-13T17:51:54.382624Z"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pricing-tiers/{tier_id}": {
+      "parameters": [
+        {
+          "name": "tier_id",
+          "required": true,
+          "in": "path",
+          "description": "A unique identifier for the tier.",
+          "schema": {
+            "type": "string",
+            "example": "trade"
+          }
+        }
+      ],
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update a pricing tier",
+        "description": "OpUpdateTier requires `RoleAdmin` privileges.\n",
+        "operationId": "OpUpdateTier",
+        "tags": [
+          "Pricing"
+        ],
+        "responses": {
+          "501": {
+            "description": "Not Implemented"
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get a pricing tier by tier id",
+        "description": "OpGetTier requires `RoleShopper` privileges.\n",
+        "operationId": "OpGetTier",
+        "tags": [
+          "Pricing"
+        ],
+        "responses": {
+          "501": {
+            "description": "Not Implemented"
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete a pricing tier",
+        "description": "OpDeleteTier requires `RoleAdmin` privileges.\n",
+        "operationId": "OpDeleteTier",
+        "tags": [
+          "Pricing"
+        ],
+        "responses": {
+          "501": {
+            "description": "Not Implemented"
+          }
+        }
+      }
+    },
+    "/products/{product_id}/tiers/{tier_id}/pricing": {
+      "parameters": [
+        {
+          "name": "product_id",
+          "required": true,
+          "in": "path",
+          "description": "A unique identifier for the product.",
+          "schema": {
+            "type": "string",
+            "example": "TV-SKU"
+          }
+        },
+        {
+          "name": "tier_id",
+          "required": true,
+          "in": "path",
+          "description": "A unique identifier for the tier.",
+          "schema": {
+            "type": "string",
+            "example": "default"
+          }
+        }
+      ],
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update a product pricing by product SKU and pricing tier reference",
+        "description": "OpUpdateTierPricing requires `RoleAdmin` privileges.\n",
+        "operationId": "OpUpdateTierPricing",
+        "tags": [
+          "Pricing"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "unit_price"
+                ],
+                "properties": {
+                  "unit_price": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "example": 2066250
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pricing object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pricing"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get a product pricing by product SKU and pricing tier reference",
+        "description": "OpGetTierPricing requires `RoleShopper` privileges.\n",
+        "operationId": "OpGetTierPricing",
+        "tags": [
+          "Pricing"
+        ],
+        "responses": {
+          "200": {
+            "description": "Pricing object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pricing"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete a product pricing by product SKU and pricing tier reference",
+        "description": "OpDeleteTierPricing requires `RoleAdmin` privileges.\n",
+        "operationId": "OpDeleteTierPricing",
+        "tags": [
+          "Pricing"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/products/tiers/{tier_id}/pricing": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get all product pricings for a given tier",
+        "description": "OpMapPricingByTier requires `RoleShopper` privileges.\n",
+        "operationId": "OpMapPricingByTier",
+        "tags": [
+          "Pricing"
+        ],
+        "parameters": [
+          {
+            "name": "tier_id",
+            "required": true,
+            "in": "path",
+            "description": "A unique identifier for the tier.",
+            "schema": {
+              "type": "string",
+              "example": "default"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PricingMap object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingMap"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Place an guest or customer order",
+        "description": "OpPlaceOrder requires `RoleShopper` privileges.\n",
+        "operationId": "OpPlaceOrder",
+        "tags": [
+          "Orders"
+        ],
+        "requestBody": {
+          "description": "Order to place in the system",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid input, object invalid"
+          },
+          "409": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "cart/cart-item-already-exists": {
+                    "summary": "validate/invalid-request-body",
+                    "value": {
+                      "status": 409,
+                      "code": "validate/invalid-request-body",
+                      "message": "For placing guest orders set both contact_name and email"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{order_id}/stripecheckout": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Start Stripe checkout session",
+        "description": "OpStripeCheckout requires `RoleShopper` privileges. Initiates the Stripe checkout process recording an intent to pay against the order with the given `order_id`.\n",
+        "operationId": "OpStripCheckout",
+        "tags": [
+          "Stripe"
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "required": true,
+            "in": "path",
+            "description": "Order ID",
+            "schema": {
+              "type": "string",
+              "example": "100005"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Stripe Checkout Session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StripeCheckoutSession"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stripe-webhook": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Stripe Web Hook callback for fulfillment",
+        "description": "OpStripeWebhook requires no privileges and is a public endpoint. See the Stripe documentation on [Fulfilling purchases with webhooks](https://stripe.com/docs/payments/checkout/fulfillment#webhooks).\n\nAfter OpStripeWebhook is called successfully, the order status is set to `completed` and payment set to `paid`.\n",
+        "operationId": "StripeWebhook",
+        "tags": [
+          "Stripe"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/sysinfo": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get system information",
+        "description": "OpSystemInfo requires `RoleAdmin` privileges.\n",
+        "operationId": "OpSystemInfo",
+        "tags": [
+          "Misc"
+        ],
+        "responses": {
+          "200": {
+            "description": "System info object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "StripeCheckoutSession": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "example": "stripe_checkout_session"
+          },
+          "checkout_session_id": {
+            "type": "string",
+            "example": "cs_test_7sKcYwUtBPWVonB6b5aa0UrhwTBrId78Wb9l0GTEduj3rCwmi33EJAEr"
+          }
+        }
+      },
+      "Cart": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "example": "cart"
+          },
+          "id": {
+            "type": "string",
+            "example": "30ad2997-3d19-4001-88d9-e2568d8cf720"
+          },
+          "locked": {
+            "type": "string",
+            "example": false
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-08-02T12:02:42.217936Z"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-08-02T12:02:42.217936Z"
+          },
+          "items": {
+            "type": "object",
+            "properties": {
+              "object": {
+                "type": "string",
+                "example": "list"
+              },
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CartItem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "CartItem": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "example": "cart_item"
+          },
+          "id": {
+            "type": "string",
+            "example": "69186b07-075f-42b9-b5cb-d66d9addabf1"
+          },
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "ab18bfeb-4dfe-4a69-a6e3-5e9317b29c35"
+          },
+          "sku": {
+            "type": "string",
+            "example": "TV-SKU"
+          },
+          "name": {
+            "type": "string",
+            "example": "LCD TV System"
+          },
+          "qty": {
+            "type": "integer",
+            "example": 5
+          },
+          "unit_price": {
+            "type": "integer",
+            "example": 2066250
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-08-01T15:37:32.269875Z"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-08-01T15:37:32.269875Z"
+          }
+        }
+      },
+      "DiscountUpdateRequest": {
+        "type": "object",
+        "required": [
+          "type",
+          "start",
+          "end",
+          "amount",
+          "name"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "percentage",
+              "fixed"
+            ],
+            "example": "percentage"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-08-05 09:00:00.000000Z"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-08-08 18:00:00.000000Z"
+          },
+          "amount": {
+            "type": "integer",
+            "example": 200000
+          },
+          "name": {
+            "type": "string",
+            "example": "August Deals"
+          }
+        }
+      },
+      "Discount": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "example": "discount"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "391c499e-5e58-430a-8d92-a8587cbc3517"
+          },
+          "code": {
+            "type": "string",
+            "example": "AUG20"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "percentage",
+              "fixed"
+            ],
+            "example": "percentage"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-08-05 09:00:00.000000Z"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-08-08 18:00:00.000000Z"
+          },
+          "amount": {
+            "type": "integer",
+            "example": 150000
+          },
+          "name": {
+            "type": "string",
+            "example": "August Special"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-07-30 14:23:31.756204Z"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-07-30 14:23:31.756204Z"
+          }
+        }
+      },
+      "DiscountApplyRequest": {
+        "type": "object",
+        "required": [
+          "discount_id"
+        ],
+        "properties": {
+          "discount_id": {
+            "type": "string",
+            "example": "2597d93e-12bf-46be-b712-2a7d2d6b5d29"
+          }
+        }
+      },
+      "CustomerRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "password",
+          "firstname",
+          "lastname"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "john.doe@example.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "Xxaks9SfmcT5avBR"
+          },
+          "firstname": {
+            "type": "string",
+            "example": "John"
+          },
+          "lastname": {
+            "type": "string",
+            "example": "Doe"
+          }
+        }
+      },
+      "Customer": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "example": "customer"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "53b3384b-fc35-47d1-9054-6b81f30f382e"
+          },
+          "uid": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "example": "eocNauyyf3WchJG6WRWXePEqbTE2"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "john.doe@example.com"
+          },
+          "firstname": {
+            "type": "string",
+            "example": "John"
+          },
+          "lastname": {
+            "type": "string",
+            "example": "Doe"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-07-30 14:23:31.756204Z"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-07-30 14:23:31.756204Z"
+          }
+        }
+      },
+      "DevKey": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "example": "developer_key"
+          },
+          "id": {
+            "type": "string",
+            "example": "5a85466e-9f23-4d71-b8b7-adbfc479bb6c"
+          },
+          "key": {
+            "type": "string"
+          },
+          "customer_id": {
+            "type": "string",
+            "example": "5a85466e-9f23-4d71-b8b7-adbfc479bb6c"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-07-31T14:36:13.595972Z"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-07-31T14:36:13.595972Z"
+          }
+        }
+      },
+      "SignInDevKeyRequest": {
+        "type": "object",
+        "required": [
+          "key"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "2Pb3bNxw3PDBEJ8U6hf7mLVgrYBhP8exZBA6xJDSh2zQ"
+          }
+        }
+      },
+      "SignInDevKeyCustomToken": {
+        "type": "object",
+        "properties": {
+          "custom_token": {
+            "type": "string",
+            "example": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJmaXJlYmFzZS1hZG1pbnNkay1xbGwzaEB0ZXN0LWRhdGEtb2FrLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJleHAiOjE1NjQ2MTU1NzYsImlhdCI6MTU2NDYxMTk3Niwic3ViIjoiZmlyZWJhc2UtYWRtaW5zZGstcWxsM2hAdGVzdC1kYXRhLW9hay5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsInVpZCI6IkFIeXJWTUZ5cEdOOVJ1VDF3R0VlcmtvcEdybjEifQ.nIUsoOqfSBZuiYM9oWCwLAg9EGiudjYcgN5xEdn-8fN_SXlEOd3zf0COpA2d8R-Bk3WPD2l-EjMwVg4FH3Wefq8_TTbI_N1d4Ih3e-ksvlsvw-PP8Rye9yx58hEojmSsVk7FccBtvW8upl-GSa2j_sfRT4Sfaa9u1WmUdjMu_-wosZDYnDlMs1p73KN6Fq6NizsfcDVSWDDi3kzLg1ROI8kcqPE_O2N33e8Tm2mgfd9SXQL5XlpbuF963qqvLgq--0fQ37r-7Med2m_emfG93ZhsqYzIlBgSx3EgaZ_msW_Cia37d5UApqvR2RH0udzjRpXvN4Evh3CiSnC696oIeQ"
+          },
+          "customer": {
+            "type": "object",
+            "properties": {
+              "object": {
+                "type": "string",
+                "example": "customer"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "53b3384b-fc35-47d1-9054-6b81f30f382e"
+              },
+              "uid": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string",
+                "example": "eocNauyyf3WchJG6WRWXePEqbTE2"
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "example": "john.doe@example.com"
+              },
+              "firstname": {
+                "type": "string",
+                "example": "John"
+              },
+              "lastname": {
+                "type": "string",
+                "example": "Doe"
+              },
+              "created": {
+                "type": "string",
+                "format": "date-time",
+                "example": "2019-07-30 14:23:31.756204Z"
+              },
+              "modified": {
+                "type": "string",
+                "format": "date-time",
+                "example": "2019-07-30 14:23:31.756204Z"
+              }
+            }
+          }
+        }
+      },
+      "OrderRequest": {
+        "type": "object",
+        "required": [
+          "customer",
+          "billing_address",
+          "shipping_address"
+        ],
+        "properties": {
+          "cart_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "33ed8b80-3ba7-4f31-9364-2559a83258a7"
+          },
+          "customer": {
+            "type": "object",
+            "properties": {
+              "contact_name": {
+                "type": "string",
+                "example": "John Doe"
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "example": "john@example.com"
+              }
+            }
+          },
+          "billing_address": {
+            "$ref": "#/components/schemas/AddressRequest"
+          },
+          "shipping_address": {
+            "$ref": "#/components/schemas/AddressRequest"
+          }
+        }
+      },
+      "Order": {
+        "properties": {
+          "billing_address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "shipping_address": {
+            "$ref": "#/components/schemas/Address"
+          }
+        }
+      },
+      "AddressRequest": {
+        "required": [
+          "typ",
+          "contact_name",
+          "addr1",
+          "city",
+          "county",
+          "postcode",
+          "country"
+        ],
+        "properties": {
+          "typ": {
+            "type": "string",
+            "enum": [
+              "shipping",
+              "billing"
+            ],
+            "example": "billing"
+          },
+          "contact_name": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "addr1": {
+            "type": "string",
+            "example": "456 The Road"
+          },
+          "addr2": {
+            "type": "string",
+            "example": "Park Lane"
+          },
+          "city": {
+            "type": "string",
+            "example": "Cambridge"
+          },
+          "postcode": {
+            "type": "string",
+            "example": "CB1 9ZZ"
+          },
+          "country": {
+            "type": "string",
+            "example": "GB"
+          }
+        }
+      },
+      "Address": {
+        "properties": {
+          "object": {
+            "type": "string",
+            "example": "billing"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "c7c9ff19-4bc9-4953-a1bd-9dee0b41b4fe"
+          },
+          "typ": {
+            "type": "string",
+            "enum": [
+              "shipping",
+              "billing"
+            ],
+            "example": "billing"
+          },
+          "contact_name": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "addr1": {
+            "type": "string",
+            "example": "456 The Road"
+          },
+          "addr2": {
+            "type": "string",
+            "example": "Park Lane"
+          },
+          "city": {
+            "type": "string",
+            "example": "Cambridge"
+          },
+          "postcode": {
+            "type": "string",
+            "example": "CB1 9ZZ"
+          },
+          "country": {
+            "type": "string",
+            "example": "GB"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-06-26T10:26:14.047Z"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-06-26T10:26:14.047Z"
+          }
+        }
+      },
+      "AssocProduct": {
+        "properties": {
+          "sku": {
+            "type": "string",
+            "example": "NCIP9WFBB"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-07-30T13:57:23.269373Z"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-07-30T13:57:23.269373Z"
+          }
+        }
+      },
+      "AssocProductIDRequest": {
+        "type": "object",
+        "additionalProperties": {
+          "properties": {
+            "products": {
+              "type": "array",
+              "items": {
+                "required": [
+                  "product_id"
+                ],
+                "properties": {
+                  "sku": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "e0130bb0-5996-451f-95a0-e5c5afa207d7"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "Associations": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "products": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/AssocProduct"
+              }
+            }
+          }
+        }
+      },
+      "Categories": {
+        "properties": {
+          "object": {
+            "type": "string",
+            "example": "category"
+          },
+          "id": {
+            "type": "string",
+            "example": "c2ebdb86-5cd1-4c4c-8614-017a494ff77b"
+          },
+          "segment": {
+            "type": "string",
+            "example": "wireless-cctv"
+          },
+          "name": {
+            "type": "string",
+            "example": "Wireless CCTV"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Categories"
+            }
+          }
+        }
+      },
+      "CategoryRequest": {
+        "required": [
+          "segment",
+          "name",
+          "categories"
+        ],
+        "properties": {
+          "segment": {
+            "type": "string",
+            "example": "wireless-cctv"
+          },
+          "name": {
+            "type": "string",
+            "example": "Wireless CCTV"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryRequest"
+            }
+          }
+        }
+      },
+      "PricingTier": {
+        "properties": {
+          "object": {
+            "type": "string",
+            "example": "pricing_tier"
+          },
+          "id": {
+            "type": "string",
+            "example": "96459863-28ed-41a0-919d-90de39ca76e0"
+          },
+          "tier_ref": {
+            "type": "string",
+            "example": "default"
+          },
+          "title": {
+            "type": "string",
+            "example": "Default Tier"
+          },
+          "description": {
+            "type": "string",
+            "example": "Default pricing tier is the fallback pricing tier"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-08-13 17:51:49.45419Z"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-08-13 17:51:49.45419"
+          }
+        }
+      },
+      "PricingMap": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "unit_price": {
+              "type": "integer",
+              "example": 2066250
+            },
+            "created": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2019-07-31T17:03:17.673329Z"
+            },
+            "modified": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2019-07-31T17:03:17.673329Z"
+            }
+          }
+        }
+      },
+      "Pricing": {
+        "properties": {
+          "object": {
+            "type": "string",
+            "example": "pricing"
+          },
+          "id": {
+            "type": "string",
+            "example": "b85f6782-c6a8-4188-81ca-c9c1eba45367"
+          },
+          "sku": {
+            "type": "string",
+            "example": "TV-SKU"
+          },
+          "tier_id": {
+            "type": "string",
+            "example": "default"
+          },
+          "unit_price": {
+            "type": "integer",
+            "example": 2066250
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-07-30T13:57:23.289157Z"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-07-31T15:27:15.536449Z"
+          }
+        }
+      },
+      "Image": {
+        "properties": {
+          "object": {
+            "type": "string",
+            "example": "image"
+          },
+          "id": {
+            "type": "string",
+            "example": "e2a1b7ff-a00a-4d7c-a2dd-86e8ea749ed1"
+          },
+          "sku": {
+            "type": "string",
+            "example": "USB32GBSP"
+          },
+          "path": {
+            "type": "string",
+            "example": "4439.jpg"
+          },
+          "gsurl": {
+            "type": "string",
+            "example": "gs://4439.jpg"
+          },
+          "width": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 999999
+          },
+          "height": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 999999
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 0
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-07-30T14:31:47.672541Z"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-07-30T14:31:47.672541Z"
+          }
+        }
+      },
+      "ImageRequest": {
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "example": "images/products/namwa1.jpg"
+          }
+        }
+      },
+      "ProductRequest": {
+        "required": [
+          "sku",
+          "ean",
+          "path",
+          "name",
+          "images",
+          "pricing"
+        ],
+        "properties": {
+          "sku": {
+            "type": "string",
+            "example": "WATER-SKU"
+          },
+          "ean": {
+            "type": "string",
+            "example": "5060181650666"
+          },
+          "path": {
+            "type": "string",
+            "example": "water-bottle"
+          },
+          "name": {
+            "type": "string",
+            "example": "Water Bottle"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "required": [
+                "path",
+                "title"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "example": "https://www.example.com/yourfile.jpg"
+                },
+                "title": {
+                  "type": "string",
+                  "example": "Side view of water bottle"
+                }
+              }
+            }
+          },
+          "pricing": {
+            "type": "array",
+            "items": {
+              "required": [
+                "pricing_tier_id",
+                "unit_price"
+              ],
+              "properties": {
+                "pricing_tier_id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "2b66dcf0-d2bf-45e4-8947-6ec29b603f42"
+                },
+                "unit_price": {
+                  "type": "integer",
+                  "description": "Unit prices are stored as integer to 4 decimal places",
+                  "example": 19950
+                }
+              }
+            }
+          },
+          "content": {
+            "type": "object",
+            "required": [
+              "meta",
+              "videos",
+              "manuals"
+            ],
+            "properties": {
+              "meta": {
+                "type": "object",
+                "required": [
+                  "title",
+                  "keywords",
+                  "description"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "The title of the page when rendered as HTML",
+                    "example": "Water Bottle Page"
+                  },
+                  "keywords": {
+                    "type": "string",
+                    "example": "water, bottle, drink"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "A refreshing drink for all occasions."
+                  }
+                }
+              },
+              "videos": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "v1",
+                  "v2",
+                  "v3"
+                ]
+              },
+              "manuals": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "m1",
+                  "m2",
+                  "m3"
+                ]
+              },
+              "software": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "s1",
+                  "s2",
+                  "s3"
+                ]
+              },
+              "summary": {
+                "type": "string",
+                "example": "Summary line"
+              },
+              "specification": {
+                "type": "string",
+                "example": "Specification of your product"
+              },
+              "description": {
+                "type": "string",
+                "example": "Your description goes here"
+              },
+              "in_the_box": {
+                "type": "string",
+                "example": "Stuff in the box"
+              }
+            }
+          }
+        }
+      },
+      "ProductUpdateRequest": {
+        "required": [
+          "ean",
+          "path",
+          "name",
+          "images",
+          "pricing"
+        ],
+        "properties": {
+          "ean": {
+            "type": "string",
+            "example": "5060181650666"
+          },
+          "path": {
+            "type": "string",
+            "example": "water-bottle"
+          },
+          "name": {
+            "type": "string",
+            "example": "Water Bottle"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "required": [
+                "path",
+                "title"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "example": "https://www.example.com/yourfile.jpg"
+                },
+                "title": {
+                  "type": "string",
+                  "example": "Side view of water bottle"
+                }
+              }
+            }
+          },
+          "pricing": {
+            "type": "array",
+            "items": {
+              "required": [
+                "pricing_tier_id",
+                "unit_price"
+              ],
+              "properties": {
+                "pricing_tier_id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "2b66dcf0-d2bf-45e4-8947-6ec29b603f42"
+                },
+                "unit_price": {
+                  "type": "integer",
+                  "description": "Unit prices are stored as integer to 4 decimal places",
+                  "example": 299500
+                }
+              }
+            }
+          },
+          "content": {
+            "type": "object",
+            "required": [
+              "meta",
+              "videos",
+              "manuals"
+            ],
+            "properties": {
+              "meta": {
+                "type": "object",
+                "required": [
+                  "title",
+                  "keywords",
+                  "description"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "The title of the page when rendered as HTML",
+                    "example": "Water Bottle Page"
+                  },
+                  "keywords": {
+                    "type": "string",
+                    "example": "water, bottle, drink"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "A refreshing drink for all occasions."
+                  }
+                }
+              },
+              "videos": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "v1",
+                  "v2",
+                  "v3"
+                ]
+              },
+              "manuals": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "m1",
+                  "m2",
+                  "m3"
+                ]
+              },
+              "software": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "s1",
+                  "s2",
+                  "s3"
+                ]
+              },
+              "summary": {
+                "type": "string",
+                "example": "Summary line"
+              },
+              "specification": {
+                "type": "string",
+                "example": "Specification of your product"
+              },
+              "description": {
+                "type": "string",
+                "example": "Your description goes here"
+              },
+              "in_the_box": {
+                "type": "string",
+                "example": "Stuff in the box"
+              }
+            }
+          }
+        }
+      },
+      "ProductContent": {
+        "properties": {
+          "meta": {
+            "type": "object",
+            "required": [
+              "title",
+              "description"
+            ],
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          },
+          "videos": {
+            "type": "string"
+          },
+          "manuals": {
+            "type": "string"
+          },
+          "software": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "in_the_box": {
+            "type": "string"
+          }
+        }
+      },
+      "ProductSlim": {
+        "properties": {
+          "object": {
+            "type": "string",
+            "example": "product_slim"
+          },
+          "id": {
+            "type": "string",
+            "example": "cc3a2840-af1c-45d1-a861-6260bbd9946f"
+          },
+          "sku": {
+            "type": "string",
+            "example": "WATER-SKU"
+          },
+          "ean": {
+            "type": "string",
+            "example": "WATER-EAN"
+          },
+          "path": {
+            "type": "string",
+            "example": "water-bottle"
+          },
+          "name": {
+            "type": "string",
+            "example": "Water Bottle"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-08-07T15:39:48.546441Z"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-08-07T15:39:48.546441Z"
+          }
+        }
+      },
+      "Product": {
+        "properties": {
+          "object": {
+            "type": "string",
+            "example": "product"
+          },
+          "id": {
+            "type": "string",
+            "example": "8782b771-e6d7-45f3-879a-2b9d3e8ba1c7"
+          },
+          "sku": {
+            "type": "string",
+            "example": "TV-SKU"
+          },
+          "ean": {
+            "type": "string",
+            "example": "883445623"
+          },
+          "path": {
+            "type": "string",
+            "example": "usb-receiver-cctv-wireless-infrared-day-night-hidden-spy-camera-system"
+          },
+          "name": {
+            "type": "string",
+            "example": "Green Feathers Wireless Bird Box Camera & USB Recording Kit"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Image"
+            }
+          },
+          "pricing": {
+            "type": "object"
+          },
+          "content": {
+            "$ref": "#/components/schemas/ProductContent"
+          }
+        }
+      },
+      "SystemConfig": {
+        "properties": {
+          "object": {
+            "type": "string",
+            "example": "config"
+          },
+          "ECOM_FIREBASE_PROJECT_ID": {
+            "type": "string",
+            "example": "test-data-oak"
+          },
+          "ECOM_FIREBASE_WEB_API_KEY": {
+            "type": "string",
+            "example": "AIzaSyDlPXxufb303i4e7fDV9fiURU05lQeX9Kc"
+          }
+        }
+      },
+      "SystemInfo": {
+        "properties": {
+          "api_version": {
+            "type": "string",
+            "example": "v0.57.0"
+          },
+          "env": {
+            "type": "object",
+            "properties": {
+              "pg": {
+                "type": "object",
+                "properties": {
+                  "ECOM_PG_HOST": {
+                    "type": "string",
+                    "example": "localhost"
+                  },
+                  "ECOM_PG_PORT": {
+                    "type": "string",
+                    "example": "5432"
+                  },
+                  "ECOM_PG_DATABASE": {
+                    "type": "string",
+                    "example": "ecom_dev"
+                  },
+                  "ECOM_PG_USER": {
+                    "type": "string",
+                    "example": "postgres"
+                  },
+                  "ECOM_PG_SSLMODE": {
+                    "type": "string",
+                    "example": "disable"
+                  },
+                  "schema_version": {
+                    "type": "string",
+                    "example": "v0.57.0"
+                  }
+                }
+              },
+              "google": {
+                "type": "object",
+                "properties": {
+                  "ECOM_GAE_PROJECT_ID": {
+                    "type": "string",
+                    "example": "open247-gae"
+                  }
+                }
+              },
+              "firebase": {
+                "type": "object",
+                "properties": {
+                  "ECOM_FIREBASE_PROJECT_ID": {
+                    "type": "string",
+                    "example": "test-data-oak"
+                  },
+                  "ECOM_FIREBASE_WEB_API_KEY": {
+                    "type": "string",
+                    "example": "AIzaSyDlPXxufb303i4e7fDV9fiURU05lQeX9Kc"
+                  }
+                }
+              },
+              "app": {
+                "type": "object",
+                "properties": {
+                  "PORT": {
+                    "type": "string",
+                    "example": "8080"
+                  },
+                  "ECOM_APP_ROOT_EMAIL": {
+                    "type": "string",
+                    "example": "andy+root@andyfusniak.com"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error": {
+        "properties": {
+          "status": {
+            "type": "integer",
+            "example": 409
+          },
+          "code": {
+            "type": "string",
+            "example": "assocs/assocs-already-exists"
+          },
+          "message": {
+            "type": "string",
+            "example": "catalog associations already exists"
+          }
+        }
+      },
+      "PutAssocsConflict": {
+        "properties": {
+          "status": {
+            "type": "integer",
+            "example": 409
+          },
+          "code": {
+            "type": "string",
+            "example": "assocs/assocs-already-exists"
+          },
+          "message": {
+            "type": "string",
+            "example": "catalog associations already exists"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "missing_paths": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "non_leaf_paths": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "missing_skus": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

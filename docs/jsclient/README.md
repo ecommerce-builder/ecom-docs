@@ -1,7 +1,7 @@
 ---
 sidebar: auto
 ---
-# Ecom CLI Tool
+# Ecom JavaScript Client SDK Library
 
 
 ## Installation
@@ -233,3 +233,218 @@ category.products
 ## More Information
 
 View the [source code for the Ecom JavaScript client library](https://github.com/ecommerce-builder/ecom-js-client) or find instructions for installing the [npm package](https://www.npmjs.com/package/@ecommerce-builder/ecom-js-client). The source code is written in Typescript and compiled to ES5. Common JS, ES Module packages are both available as well as UMD brower builds.
+
+## Price Lists
+
+Below are some examples using node.js from the command-line.
+
+Set the `JWT` environment variable to a fresh JSON Web Token and set `ENDPOINT` to your API endpoint.
+
+``` shell
+export JWT=`ecom token show`
+export ENDPOINT='http://localhost:8080'
+```
+
+Copy and paste the following code to `test.js` in a directory. Run `npm init -y` and install the necessary dependencies `npm install node-fetch @ecommerce-builder/ecom-js-client`
+
+
+### Create a new price list
+
+The `ecom.createPriceList(priceListCode: string, currencyCode: string, strategy: string, incTax: boolean, name: string, description: string)` method creates a new price list.
+
+`currencyCode` should be set to a 3 character currency code `GBP`, `EUR` or `USD`.
+
+`strategy` determines the price list strategy to use for evaluating the cart and order. It should be set to either `simple` for the basic pricing model, `volume` for Volume Pricing or `tiered` for the Tiered Pricing model.
+
+`incTax` should be set to `false` to indicate that prices are stored excluding tax (e.g. VAT).
+
+`name` and `description` are used to indentify the price list in the control panel.
+
+``` javascript
+//
+// create-price-list.js
+//
+const token = process.env.JWT;
+const endpoint = process.env.ENDPOINT;
+const fetch = require('node-fetch');
+global.fetch = fetch;
+
+// setup client
+EcomClient = require('@ecommerce-builder/ecom-js-client');
+
+const ecom = new EcomClient({
+  fetch,
+  endpoint
+});
+ecom.setJWT(token);
+
+(async () => {
+  try {
+    let priceList = await ecom.createPriceList('tradea', 'GBP', 'simple', false, 'Trade Price A', 'Entry trade prices');
+    console.dir(priceList.toString());
+  } catch (err) {
+    if (err.code === 'price-list/price-list-code-taken') {
+      console.log('The price_list_code "tradea" already exists');
+      process.exit(1);
+    }
+    throw err;
+  }
+})();
+
+```
+
+
+### Get a price list
+
+The `ecom.getPriceList(priceListId: string)` method retrieves a price list object.
+
+``` javascript
+//
+// get-price-list.js
+//
+const token = process.env.JWT;
+const endpoint = process.env.ENDPOINT;
+const fetch = require('node-fetch');
+global.fetch = fetch;
+
+// setup client
+EcomClient = require('@ecommerce-builder/ecom-js-client');
+
+const ecom = new EcomClient({
+  fetch,
+  endpoint
+});
+ecom.setJWT(token);
+
+(async () => {
+  try {
+    let priceList = await ecom.getPriceList('debfc117-9e78-40c5-b8f5-c16f2a1d5be5');
+    console.dir(priceList);
+  } catch (err) {
+    throw err;
+  }
+})();
+```
+
+
+### Get a list of price lists
+
+The `ecom.getPriceLists()` method returns a list of price list objects. Only administrator roles can call this method.
+
+``` javascript
+//
+// get-price-lists.js
+//
+const token = process.env.JWT;
+const endpoint = process.env.ENDPOINT;
+const fetch = require('node-fetch');
+global.fetch = fetch;
+
+// setup client
+EcomClient = require('@ecommerce-builder/ecom-js-client');
+
+const ecom = new EcomClient({
+  fetch,
+  endpoint
+});
+ecom.setJWT(token);
+
+(async () => {
+  try {
+    let priceLists = await ecom.getPriceLists();
+    console.dir(priceLists);
+  } catch (err) {
+    throw err;
+  }
+})();
+```
+
+
+### Update a price list
+
+To update a price list, first retrieve an existing price list object from the library.
+
+Set the properties `priceListCode`, `currencyCode`, `strategy`, `name` and `description` before calling the `.save()` method on your price list object.
+
+Only administrator roles can call this method.
+
+``` javascript
+//
+// update-price-list.js
+//
+const token = process.env.JWT;
+const endpoint = process.env.ENDPOINT;
+const fetch = require('node-fetch');
+global.fetch = fetch;
+
+// setup client
+EcomClient = require('@ecommerce-builder/ecom-js-client');
+
+const ecom = new EcomClient({
+  fetch,
+  endpoint
+});
+ecom.setJWT(token);
+
+(async () => {
+  try {
+    let priceList = await ecom.getPriceList('debfc117-9e78-40c5-b8f5-c16f2a1d5be5');
+    console.dir(priceList);
+
+    priceList.priceListCode = 'zray';
+    priceList.strategy = 'volume';
+    priceList.name = 'my name';
+    priceList.incTax = true;
+    priceList.currencyCode = 'GBP';
+    priceList.description = 'my desc';
+    await priceList.save();
+    console.dir(priceList);
+  } catch (err) {
+    throw err;
+  }
+})();
+```
+
+
+### Delete a price list
+
+Call the `.delete()` method directly on a price list object. After the call is successful the `priceListCode`, `strategy`, `name` and `description` properties are set to the empty string. `incTax` is set to `false` and the `created` and `modified` properties are set to the epoch date.
+
+The deleted price list object should be discarded.
+
+Only administrator roles can call this method.
+
+``` javascript
+//
+// delete-price-list.js
+//
+const token = process.env.JWT;
+const endpoint = process.env.ENDPOINT;
+const fetch = require('node-fetch');
+global.fetch = fetch;
+
+// setup client
+EcomClient = require('@ecommerce-builder/ecom-js-client');
+
+
+const ecom = new EcomClient({
+  fetch,
+  endpoint
+});
+ecom.setJWT(token);
+
+(async () => {
+  try {
+    let priceList = await ecom.getPriceList('debfc117-9e78-40c5-b8f5-c16f2a1d5be5');
+    console.log(priceList.toString());
+    await priceList.delete();
+    console.log(priceList.toString());
+  } catch (err) {
+    if (err.code === 'price-list/price-list-in-use') {
+      console.log('You cannot delete this price list as it is in use.');
+      process.exit(1);
+    }
+    throw err;
+  }
+})();
+```

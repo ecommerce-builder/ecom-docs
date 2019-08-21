@@ -1,12 +1,9 @@
 {
   "name": "ecom-docs",
-  "version": "0.2.3",
+  "version": "0.4.0",
   "description": "Ecom documentation",
   "main": "index.js",
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
     "docs:buildanddeploy": "vuepress build docs && firebase deploy"
@@ -22,6 +19,6 @@
   },
   "homepage": "https://github.com/ecommerce-builder/ecom-docs#readme",
   "devDependencies": {
-    "vuepress": "^0.14.11"
+    "vuepress": "^1.0.3"
   }
 }
