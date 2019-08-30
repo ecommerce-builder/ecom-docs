@@ -20,5 +20,8 @@
   "homepage": "https://github.com/ecommerce-builder/ecom-docs#readme",
   "devDependencies": {
     "vuepress": "^1.0.3"
+  },
+  "dependencies": {
+    "typescript": "^3.6.2"
   }
 }
