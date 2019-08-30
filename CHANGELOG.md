@@ -6,6 +6,9 @@
 ## 0.3.0 (Mon 1 Jul 2019)
 + Update download references to `v0.13.1` cli tool.
 
+## 0.2.4 (Thu 6 Jun 2019)
++ Expand description of YAML file formats.
+
 ## 0.2.3 (Wed 29 May 2019)
 + Fixed broken markdown links.
 
