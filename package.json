@@ -1,6 +1,6 @@
 {
   "name": "ecom-docs",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Ecom documentation",
   "main": "index.js",
   "scripts": {
