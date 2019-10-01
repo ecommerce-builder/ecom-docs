@@ -1,4 +1,7 @@
 # CHANGELOG
+## 0.5.0 (Tue 1 Oct 2019)
++ Up to date with API v0.60.1
+
 ## 0.4.0 (Wed 21 Aug 2019)
 + Client SDK Library now includes admin functions. To be written.
 + Updated documentation for price list methods.
