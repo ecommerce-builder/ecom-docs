@@ -11,7 +11,7 @@
     },
     {
       "description": "Ecom Test API Service Ngrok",
-      "url": "https://c90e3367.ngrok.io"
+      "url": "https://4b9e935c.ngrok.io"
     }
   ],
   "info": {
@@ -377,66 +377,6 @@
         }
       }
     },
-    "/carts/{id}/coupons": {
-      "parameters": [
-        {
-          "name": "id",
-          "required": true,
-          "in": "path",
-          "description": "A unique identifier for the cart.",
-          "schema": {
-            "type": "string",
-            "format": "uuid",
-            "example": "30ad2997-3d19-4001-88d9-e2568d8cf720"
-          }
-        }
-      ],
-      "get": {
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Get cart coupons",
-        "description": "OpGetCartCoupons requires `RoleShopper` privileges.\n",
-        "operationId": "OpGetCartCoupons",
-        "tags": [
-          "Cart Coupons"
-        ],
-        "responses": {
-          "200": {
-            "description": "List of cart coupon objects",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "object": {
-                      "type": "string",
-                      "example": "list"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/CartCoupon"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "The cart with cart_id in the path could not be found. You should first create a cart calling the `OpCreateCart` operation and use its cart_id.\n",
-            "content": {
-              "application/json": {
-                "example": ""
-              }
-            }
-          }
-        }
-      }
-    },
     "/carts-coupons": {
       "post": {
         "security": [
@@ -445,7 +385,7 @@
           }
         ],
         "summary": "Apply a coupon to the cart",
-        "description": "OpApplyCouponToCart requires `RoleShopper` privileges.\n",
+        "description": "Attempts to apply a coupon with `cart_id` to the cart with `cart_id`.\n\nOpApplyCouponToCart requires `RoleShopper` privileges.\n",
         "operationId": "OpApplyCouponToCart",
         "tags": [
           "Cart Coupons"
@@ -465,12 +405,12 @@
                   "cart_id": {
                     "type": "string",
                     "format": "uuid",
-                    "example": "d9b210a3-0a0a-485f-8851-0ca77cee02f8"
+                    "example": "ee524e6e-a985-48c0-8de0-dc364556e554"
                   },
-                  "product_id": {
+                  "coupon_id": {
                     "type": "string",
                     "format": "uuid",
-                    "example": "3342dc39-58ec-4cd5-a99e-0d602c600741"
+                    "example": "a4c0e633-92fe-4595-ae8d-dd325dc2bf73"
                   }
                 }
               }
@@ -488,6 +428,34 @@
               }
             }
           },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "carts/cart-not-found": {
+                    "summary": "carts/cart-not-found",
+                    "value": {
+                      "status": 404,
+                      "code": "carts/cart-not-found",
+                      "message": "cart not found"
+                    }
+                  },
+                  "coupons/coupon-not-found": {
+                    "summary": "coupons/coupon-not-found",
+                    "value": {
+                      "status": 404,
+                      "code": "coupons/coupon-not-found",
+                      "message": "coupon not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "409": {
             "description": "Conflict",
             "content": {
@@ -496,28 +464,93 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
-                  "cart/coupon-already-in-cart": {
-                    "summary": "cart/coupon-already-applied-to-cart",
+                  "carts-coupons/cart-coupon-exists": {
+                    "summary": "carts-coupons/cart-coupon-exists",
                     "value": {
                       "status": 409,
-                      "code": "cart/coupon-already-applied-to-cart",
-                      "message": "the coupon has already been applied to the cart"
+                      "code": "carts-coupons/cart-coupon-exists",
+                      "message": "coupon already in cart"
                     }
                   },
-                  "cart/coupon-not-found": {
-                    "summary": "cart/coupon-not-found",
+                  "carts/coupon-not-at-start-date": {
+                    "summary": "carts/coupon-not-at-start-date",
                     "value": {
                       "status": 409,
-                      "code": "cart/coupon-not-found",
-                      "message": "the coupon could not be found"
+                      "code": "carts/coupon-not-at-start-date",
+                      "message": "coupon promotion date has not started"
                     }
                   },
-                  "cart/coupon-not-valid": {
-                    "summary": "cart/coupon-not-valid",
+                  "coupons/coupon-expired": {
+                    "summary": "coupons/coupon-expired",
                     "value": {
                       "status": 409,
-                      "code": "cart/coupon-not-valid",
-                      "message": "coupon is not a valid coupon"
+                      "code": "coupons/coupon-expired",
+                      "message": "coupon expired"
+                    }
+                  },
+                  "coupons/coupon-void": {
+                    "summary": "coupons/coupon-void",
+                    "value": {
+                      "status": 409,
+                      "code": "coupons/coupon-void",
+                      "message": "coupon void"
+                    }
+                  },
+                  "coupons/coupon-used": {
+                    "summary": "coupons/coupon-used",
+                    "value": {
+                      "status": 409,
+                      "code": "coupons/coupon-used",
+                      "message": "coupon has already been used"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "parameters": [
+          {
+            "name": "cart_id",
+            "required": true,
+            "in": "query",
+            "description": "A unique identifier for the cart",
+            "schema": {
+              "type": "string",
+              "example": "ee524e6e-a985-48c0-8de0-dc364556e554"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Retrieve a list of all coupons applied to a given cart",
+        "description": "Retrieves a list of all coupons applied to a the cart with `cart_id`.\nOpListCartCoupons requires `RoleShopper` privileges or higher.\n",
+        "operationId": "OpListCartCoupons",
+        "tags": [
+          "Cart Coupons"
+        ],
+        "responses": {
+          "200": {
+            "description": "list of cart_coupon objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CartCoupon"
+                      }
                     }
                   }
                 }
@@ -540,6 +573,46 @@
           }
         }
       ],
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Retrieve a single cart_coupon object",
+        "description": "OpGetCartCoupon requires `RoleShopper` privileges or higher.\n",
+        "operationId": "OpGetCartCoupon",
+        "tags": [
+          "Cart Coupons"
+        ],
+        "responses": {
+          "200": {
+            "description": "cart_coupon object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartCoupon"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 404,
+                  "code": "carts-coupons/cart-coupon-not-found",
+                  "message": "cart coupon not found"
+                }
+              }
+            }
+          }
+        }
+      },
       "delete": {
         "security": [
           {
@@ -547,7 +620,7 @@
           }
         ],
         "summary": "Unapply a coupon from the cart",
-        "description": "OpUnapplyCartCoupon requires `RoleAdmin` privileges.\n",
+        "description": "OpUnapplyCartCoupon requires `RoleShopper` privileges.\n",
         "tags": [
           "Cart Coupons"
         ],
@@ -556,7 +629,19 @@
             "description": "No Content"
           },
           "404": {
-            "description": "Not Found"
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 404,
+                  "code": "carts-coupons/cart-coupon-not-found",
+                  "message": "cart coupon not found"
+                }
+              }
+            }
           }
         }
       }
@@ -570,10 +655,30 @@
         ],
         "summary": "Create a new offer",
         "description": "OpCreateOffer requires `RoleAdmin` privileges.\n",
-        "operationId": "OpCreateOffer",
+        "operationId": "OpActivateOffer",
         "tags": [
           "Offers"
         ],
+        "requestBody": {
+          "description": "To active offer pass a `promo_rule_id` attribute identifying the promo rule to use for the offer.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "promo_rule_id"
+                ],
+                "properties": {
+                  "promo_rule_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "33005ffa-05b3-4e91-98be-3332764bc40c"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": "offer object",
@@ -685,50 +790,6 @@
         }
       }
     },
-    "/products/{id}/offers": {
-      "post": {
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Apply an offer to an individual product",
-        "description": "OpApplyProductOffer requires `RoleAdmin` privileges. The request body contains a `offer_id` that references the id returned when creating a new offer object.\n",
-        "operationId": "OpApplyProductOffer",
-        "tags": [
-          "Offers"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "Product SKU",
-            "schema": {
-              "type": "string",
-              "example": "TV-SKU"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/OfferApplyRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "Not Content"
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        }
-      }
-    },
     "/coupons": {
       "post": {
         "security": [
@@ -736,41 +797,268 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Create a new coupon offer",
-        "description": "OpCreateCoupon requires `RoleAdmin` privileges.\n",
+        "summary": "Mint a new coupon",
+        "description": "OpCreateCoupon mints a new coupon to be used as currency in the cart.\n\nCoupons are either reusable or non-reusable. Reusable coupons can be spent multiple times by the same or different users. Non-reusable coupons can only be spent once.\n\nTo mint a new coupon pass a `promo_rule_id`, `coupon_code` and `reusable` attributes in the request body. The `promo_rule_id` should be an existing promo rule that is not already in use. The `coupon_code` can be used as a short identifier, typically input by the shopper during the cart or checkout process. `reusuable` is a boolean flag indicating whether this coupon can be spent multiple times.\n\nIf the `coupon_code` attribute value already exists, the API responds with a `409 Conflict` status code.\n\nIf the `promo_rule_id` attribute value does not reference an existing promo rule the API responds with a `404 Not Found` status code.\n\nOn success, the API responds with a `201 Created` status code.\n\nOpCreateCoupon requires `RoleAdmin` privileges or higher.\n",
         "operationId": "OpCreateCoupon",
         "tags": [
           "Coupons"
         ],
-        "responses": {
-          "501": {
-            "description": "Not Implemented"
-          }
-        }
-      }
-    },
-    "/coupons/{id}": {
-      "delete": {
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "A unique identifier for the offer.",
-            "schema": {
-              "type": "string",
-              "example": "20574b05-29a4-49f6-bf89-fe231c09d8a5"
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "promo_rule_id",
+                  "coupon_code",
+                  "reusable"
+                ],
+                "properties": {
+                  "promo_rule_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "d54aa60b-a2b7-4f18-b4e2-5c410bd1e263"
+                  },
+                  "coupon_code": {
+                    "type": "string",
+                    "example": "SALE20"
+                  },
+                  "reusable": {
+                    "type": "boolean",
+                    "example": true
+                  }
+                }
+              }
             }
           }
-        ],
+        },
+        "responses": {
+          "201": {
+            "description": "coupon object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Coupon"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "promo-rules/promo-rule-not-found": {
+                    "summary": "promo-rules/promo-rule-not-found",
+                    "value": {
+                      "status": 404,
+                      "code": "promo-rules/promo-rule-not-found",
+                      "message": "promo rule not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "coupons/coupon-exists": {
+                    "summary": "coupons/coupon-exists",
+                    "value": {
+                      "status": 409,
+                      "code": "coupons/coupon-exists",
+                      "message": "coupon with this coupon code already exists"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
         "security": [
           {
             "bearerAuth": []
           }
         ],
-        "summary": "Void a coupon",
-        "description": "OpVoidCoupon requires `RoleAdmin` privileges.\n",
-        "operationId": "OpVoidCoupon",
+        "summary": "Get a list of coupons",
+        "description": "Retrieves a complete list of all coupons in the system.\n\nOpListCoupons requires `RoleAdmin` privileges or higher.\n",
+        "operationId": "OpListCoupons",
+        "tags": [
+          "Coupons"
+        ],
+        "responses": {
+          "200": {
+            "description": "list of coupon objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Coupon"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/coupons/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "required": true,
+          "in": "path",
+          "description": "A unique identifier for the coupon.",
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3b7ef506-bd5a-4c37-8e76-6733a2531d36"
+          }
+        }
+      ],
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get a single coupon by id",
+        "description": "OpGetCoupon retrieves a single coupon by id.\n\nOpGetCoupon requires `RoleAdmin` privileges or higher.\n",
+        "operationId": "OpGetCoupon",
+        "tags": [
+          "Coupons"
+        ],
+        "responses": {
+          "200": {
+            "description": "coupon object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Coupon"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "coupons/coupon-not-found": {
+                    "summary": "coupons/coupon-not-found",
+                    "value": {
+                      "status": 404,
+                      "code": "coupons/coupon-not-found",
+                      "message": "coupon not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update a coupon",
+        "description": "Partially updates a coupon. Use this to void a coupon by passing the `void` attribute in the request body.\n\nThe `void` attribute value can be either true or false.\n\nOpUpdateCoupon requires `RoleAdmin` privileges or higher.\n",
+        "operationId": "OpUpdateCoupon",
+        "tags": [
+          "Coupons"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "void"
+                ],
+                "properties": {
+                  "void": {
+                    "type": "boolean",
+                    "example": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "coupon object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Coupon"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 404,
+                  "code": "coupons/coupon-not-found",
+                  "message": "coupon not found"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete the coupon with the given id",
+        "description": "Attempts to delete a coupon by id. If the coupon id could not be found the API response with a 404 Not Found status code. If found, the coupon may already have been added to a cart.\n\nUse OpUpdateCoupon if you wish to void a coupon.\n\nOpDeleteCoupon requires `RoleAdmin` privileges or higher.\n",
+        "operationId": "OpDeleteCoupon",
         "tags": [
           "Coupons"
         ],
@@ -779,7 +1067,34 @@
             "description": "No Content"
           },
           "404": {
-            "description": "Not Found"
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 404,
+                  "code": "coupons/coupon-not-found",
+                  "message": "coupon not found"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 409,
+                  "code": "coupons/coupon-in-use",
+                  "message": "coupon is already in use, consider making it void instead"
+                }
+              }
+            }
           }
         }
       }
@@ -792,7 +1107,7 @@
           }
         ],
         "summary": "Create a new promotion rule",
-        "description": "OpCreatePromoRule requires `RoleAdmin` privileges.\n",
+        "description": "Attempt to create a new promotion rule that can later be used in offers or coupons. **A promo rule by itself is free standing and has no influence until it has been applied to an offer or coupon.**.\n\nA promo rule request must contain `name`, `amount`, `type`, `promo_rule_code` and `target` attributes including an identifier for its corresponding type.\n\nThe `name` attribute is a human readable string for convenience.\n\nThe `promo_rule_code` provides a short code of upper case characters including the digits 0 through 9. It provides a more usable means to reference that the promo_rule object id passed back in the response body. However, all interaction with the API currently uses object ids only. Typically, a `promo_rule_code` would likely match the companies internal references. Example, 'SUMMERSALE20', 'SPECIALWINTER50' etc. The value used is up to the caller.\n\n`type` should be a value of `percentage` or `fixed`. If the `type` attribute has a value of `fixed` the `amount` attribute value should contain the amount to discount to 4 decimal places. e.g. £19.95 would be expressed as 199500. If the `type` attribute has a value of `percentage` the `amount` attribute value should contain the amount to discount as a percentage to 2 decimal places. i.e. between 0 and 9999. For 50% use 5000. For 25.50% use 2550 and so on.\n\nThe `target` attribute determes _what_ the rule should be applied to. Acceptable values for this attribute are `product`, `productset`, `category`, `shipping_tariff` and `total` for a single product, set of products, all products under a particular category ancestry, shipping tariff discount and order total respectively.\n\nIf the `target` attribute is set to a value of `product` an additional attribute `product_id` must be passed in the request body identifying the product of which to apply the rule.\n\nIf the `target` attribute is set to a value of `productset` an additional attribute `product_set` must be passed containing an object with a list of products. See the example request payloads below.\n\n```\n{\n  \"target\": \"productset\",\n  \"product_set\": {\n    \"object\": \"list\",\n    \"data\": [\n      {\n        \"product_id\": \"<first product id>\"\n      },\n      {\n        \"product_id\": \"<second product id>\"\n      },\n      ...\n    ]\n  }\n}\n```\n\nIf the `target` attribute is set to a value of `category` an additional attribute `category_id` must be passed containing the category id. If the category id is a leaf category in the tree, the rule will apply to all products within that category.\nIf the category is a non-leaf category in the tree, the rule will apply to all products of all leaf categories that are descendants of the non-leaf category.\n\nIn the tree below, category A is a non-leaf category containing sub categories B and C. Category B contains two products, 1 and 2. Category B contains two products, 3 and 4. If the attribute `category_id` references the id of category A, the rule will be applied to products 1, 2, 3 and 4 since categories B and C are descendants of A.\n```\n      A\n    /   \\\n   B      C\n  / \\    / \\\n 1   2  3   4\n ```\n\n Note, products are only be ever applied to leaf nodes in the hierarchy. It is not possible to link a product directly to category A.\n\nIf the `target` attribute is set to a value of `shipping_tariff` the promo rule will apply to orders that are intended to be shipped to that shipping tariff's corresponding country and courier.\n\nIf the `target` attribute is set to a value of `total`, an additional attribute `total_threshold` must be passed in the request body. The `total_threshold` attribute should contain the price amount, to 4 decimal places, to discount from the order total at checkout. e.g. £19.95 would be expressed as 199500.\n\n`start_at` and `end_at` attributes indicate the timeframe when the promotion rule will be active and are optional attributes.\n\nOnce you have created a promo rule, see the Offers and Coupons endpoints to apply the rule and make it active.\n\nOpCreatePromoRule requires `RoleAdmin` privileges.\n",
         "operationId": "OpCreatePromoRule",
         "tags": [
           "Promotion Rules"
@@ -899,9 +1214,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PromoRule"
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PromoRule"
+                      }
+                    }
                   }
                 }
               }
@@ -931,185 +1255,26 @@
         }
       }
     },
-    "/catagories/{id}/offer": {
-      "post": {
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Apply an offer code to a category",
-        "description": "OpApplyCategoryOffer requires `RoleAdmin` privileges. The request body contains a `offer_id` that references the id returned when creating an offer object.\n",
-        "operationId": "OpApplyCategoryOffer",
-        "tags": [
-          "Offers"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "A unique identifier for the category.",
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "example": "0baf0ae0-ef99-4200-822d-341f44b79b3f"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/OfferApplyRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "discount/discount-leaf-category-zero-products": {
-                    "summary": "discount/discount-leaf-category-zero-products",
-                    "value": {
-                      "status": 409,
-                      "code": "discount/discount-leaf-category-zero-products",
-                      "message": "discounts can only be applied to leaf categories containing products"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/admins": {
-      "post": {
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Create a new administrator",
-        "description": "OpCreateAdmin requires `RoleAdmin` privileges.\n",
-        "operationId": "OpCreateAdmin",
-        "tags": [
-          "Admins"
-        ],
-        "requestBody": {
-          "description": "New administrator details",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CustomerRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "A customer object",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Customer"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "List all administrators",
-        "description": "OpListAdmins requires `RoleAdmin` privileges.\n",
-        "operationId": "OpListAdmins",
-        "tags": [
-          "Admins"
-        ],
-        "responses": {
-          "200": {
-            "description": "A list of customer objects",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Customer"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/admins/{id}": {
-      "parameters": [
-        {
-          "name": "id",
-          "required": true,
-          "in": "path",
-          "description": "A unique identifier for the administrator.",
-          "schema": {
-            "type": "string",
-            "format": "uuid",
-            "example": "2d8661d3-0fac-4b72-8219-90731fb1935d"
-          }
-        }
-      ],
-      "delete": {
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Delete an administrator",
-        "description": "OpDeleteAdmin requires `RoleSuperUser` privileges.\n",
-        "operationId": "OpDeleteAdmin",
-        "tags": [
-          "Admins"
-        ],
-        "responses": {
-          "204": {
-            "description": "No content"
-          }
-        }
-      }
-    },
     "/users": {
       "post": {
-        "summary": "Create and sign up a new customer",
-        "description": "Sign up a new customer creates a new customer with the role of `RoleCustomer` only.\n### Auth\nOpCreateCustomer requires no JSON Web Token.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create and signup a new user",
+        "description": "Sign up a new customer creates a new user.\n\nOpCreateCustomer requires no JSON Web Token.\n",
         "operationId": "OpCreateCustomer",
         "tags": [
           "Users"
         ],
         "requestBody": {
-          "description": "New customer details",
+          "description": "New user details",
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CustomerRequest"
+                "$ref": "#/components/schemas/UserRequest"
               }
             }
           }
@@ -1120,7 +1285,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Customer"
+                  "$ref": "#/components/schemas/User"
                 }
               }
             }
@@ -1134,7 +1299,7 @@
           }
         ],
         "summary": "List all users",
-        "description": "OpListUsers requires `RoleAdmin` privileges.\n",
+        "description": "OpListUsers requires `RoleAdmin` privileges.\n\n## Known Issues\nCurrently, the list of user objects are missing the `price_list_id` attribute value. Use OpGetUser as a workaround.\n",
         "operationId": "OpListUsers",
         "tags": [
           "Users"
@@ -1147,7 +1312,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Customer"
+                    "$ref": "#/components/schemas/User"
                   }
                 }
               }
@@ -1156,18 +1321,350 @@
         }
       }
     },
+    "/users/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "required": true,
+          "in": "path",
+          "description": "A unique identifier for the user.",
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "88920da9-72c6-4f33-ac2b-306080b5e92c"
+          }
+        }
+      ],
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get a customer object",
+        "description": "OpGetCustomer requires `RoleCustomer` privileges.\n",
+        "operationId": "OpGetCustomer",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Customer ID",
+            "schema": {
+              "type": "string",
+              "example": "53b3384b-fc35-47d1-9054-6b81f30f382e"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Customer object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete a user",
+        "description": "Attempts to delete a user from the system. If this user has previously created addresses or developer keys, these will be delete too.\n\nIf the user has previously placed any orders, a status of 409 Conflict will be retuned with `users/user-in-use` returned in the `code` attribute of the response body.\n\nOpDeleteUser requires `RoleAdmin` privileges or higher.\n",
+        "operationId": "OpDeleteUser",
+        "tags": [
+          "Users"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 404,
+                  "code": "users/not-found",
+                  "message": "user not found"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "users/user-in-use": {
+                    "summary": "users/user-in-use",
+                    "value": {
+                      "status": 409,
+                      "code": "users/user-in-use",
+                      "message": "user cannot be deleted as it is associated with previous orders"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/developer-keys": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Generate a new developer key",
+        "description": "OpGenerateUserDevKey requires `RoleAdmin` privileges or higher.\n",
+        "operationId": "OpGenerateUserDevKey",
+        "tags": [
+          "Developer Keys"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "user_id"
+                ],
+                "properties": {
+                  "user_id": {
+                    "type": "string",
+                    "example": "d31bb101-8e44-49f0-86fd-0d4962140687"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "developer_key object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeveloperKey"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 404,
+                  "code": "users/user-not-found",
+                  "message": "user not found"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "parameters": [
+          {
+            "name": "user_id",
+            "required": true,
+            "in": "query",
+            "description": "A unique identifier for the user",
+            "schema": {
+              "type": "string",
+              "example": "d31bb101-8e44-49f0-86fd-0d4962140687"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get a list of all developer keys for a given user id",
+        "description": "OpListUsersDevKeys requires `RoleAdmin` privileges or higher.\n",
+        "operationId": "OpListUsersDevKeys",
+        "tags": [
+          "Developer Keys"
+        ],
+        "responses": {
+          "201": {
+            "description": "developer_key object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/DeveloperKey"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/developer-keys/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "required": true,
+          "in": "path",
+          "description": "A unique identifier for the developer key",
+          "schema": {
+            "type": "string",
+            "example": "c2ae4ed9-5785-4963-8d16-1b925252ae88"
+          }
+        }
+      ],
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete a developer key",
+        "description": "Deleting a developer key revokes access.\nOpDeleteUserDevKey requires `RoleAdmin` privileges or higher.\n",
+        "operationId": "OpDeleteUserDevKey",
+        "tags": [
+          "Developer Keys"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 404,
+                  "code": "developer-keys/developer-key-not-found",
+                  "message": "developer key not found"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/categories": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get all categories",
+        "description": "OpGetCatalog requires `RoleShopper` privileges.\n",
+        "operationId": "OpGetCatalog",
+        "tags": [
+          "Categories"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Category"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Purge all categories",
+        "description": "OpPurgeCatalog requires `RoleAdmin` privileges.\n",
+        "operationId": "OpPurgeCatalog",
+        "tags": [
+          "Categories"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 409,
+                  "code": "assocs/assocs-exists",
+                  "message": "OpDeleteCategories cannot be called whilst category to product associations exist"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/categories-tree": {
       "put": {
         "security": [
           {
             "bearerAuth": []
           }
         ],
-        "summary": "Replace all categories",
-        "description": "OpUpdateCatalog requires `RoleAdmin` privileges.\n",
-        "operationId": "OpUpdateCatalog",
+        "summary": "Replace the entire categories tree",
+        "description": "Purge and replace the entire categories tree in a single operation.\n",
+        "operationId": "OpUpdateCategoriesTree",
         "tags": [
-          "Categories"
+          "Categories Tree"
         ],
         "requestBody": {
           "content": {
@@ -1276,15 +1773,10 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "examples": {
-                  "cart/cart-product-exists": {
-                    "summary": "cart/cart-product-exists",
-                    "value": {
-                      "status": 409,
-                      "code": "cart/cart-product-exists",
-                      "message": "cart product exists in the cart"
-                    }
-                  }
+                "example": {
+                  "status": 409,
+                  "code": "assocs/assocs-exists",
+                  "message": "product to category relations already exist"
                 }
               }
             }
@@ -1297,15 +1789,15 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Get all categories",
-        "description": "OpGetCatalog requires `RoleShopper` privileges.\n",
-        "operationId": "OpGetCatalog",
+        "summary": "Get the entire categories as a tree",
+        "description": "OpGetCategoriesTree requires `RoleShopper` privileges or higher.\n",
+        "operationId": "OpGetCategoriesTree",
         "tags": [
-          "Categories"
+          "Categories Tree"
         ],
         "responses": {
           "200": {
-            "description": "List of categories",
+            "description": "categories tree structure",
             "content": {
               "application/json": {
                 "schema": {
@@ -1313,24 +1805,6 @@
                 }
               }
             }
-          }
-        }
-      },
-      "delete": {
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Purge all categories",
-        "description": "OpPurgeCatalog requires `RoleAdmin` privileges.\n",
-        "operationId": "OpPurgeCatalog",
-        "tags": [
-          "Categories"
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
           }
         }
       }
@@ -1463,147 +1937,6 @@
         }
       }
     },
-    "/users/{id}": {
-      "get": {
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Get a customer object",
-        "description": "OpGetCustomer requires `RoleCustomer` privileges.\n",
-        "operationId": "OpGetCustomer",
-        "tags": [
-          "Users"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "Customer ID",
-            "schema": {
-              "type": "string",
-              "example": "53b3384b-fc35-47d1-9054-6b81f30f382e"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Customer object",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Customer"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/users/{id}/devkeys": {
-      "parameters": [
-        {
-          "name": "id",
-          "required": true,
-          "in": "path",
-          "description": "Customer ID",
-          "schema": {
-            "type": "string",
-            "example": "53b3384b-fc35-47d1-9054-6b81f30f382e"
-          }
-        }
-      ],
-      "post": {
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Generate a new developer key",
-        "description": "OpGenerateCustomerDevKey requires `RoleCustomer` privileges.\n",
-        "operationId": "OpGenerateCustomerDevKey",
-        "tags": [
-          "Developer Keys"
-        ],
-        "responses": {
-          "201": {
-            "description": "Developer Key object",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DevKey"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "List a customer's developer keys",
-        "description": "OpListUsersDevKeys requires `RoleCustomer` privileges.\n",
-        "operationId": "OpListUsersDevKeys",
-        "tags": [
-          "Developer Keys"
-        ],
-        "responses": {
-          "200": {
-            "description": "List of Developer Key objects",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DevKey"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/devkeys/{id}": {
-      "delete": {
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Delete a developer key",
-        "description": "OpDeleteCustomerDevKey requires `RoleAdmin` privileges.\n",
-        "operationId": "OpDeleteCustomerDevKey",
-        "tags": [
-          "Developer Keys"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "Developer Key ID",
-            "schema": {
-              "type": "string",
-              "example": "5a85466e-9f23-4d71-b8b7-adbfc479bb6c"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        }
-      }
-    },
     "/signin-with-devkey": {
       "post": {
         "summary": "Signin with a developer key",
@@ -1635,27 +1968,15 @@
         }
       }
     },
-    "/users/{id}/addresses": {
-      "parameters": [
-        {
-          "name": "id",
-          "required": true,
-          "in": "path",
-          "description": "Customer ID",
-          "schema": {
-            "type": "string",
-            "example": "7835fa6e-38de-4959-8838-c88ab3e073b3"
-          }
-        }
-      ],
+    "/addresses": {
       "post": {
         "security": [
           {
             "bearerAuth": []
           }
         ],
-        "summary": "Add a new address for a given customer",
-        "description": "OpCreateAddress requires `RoleCustomer` privileges.\n",
+        "summary": "Create a new address for a given customer",
+        "description": "Creates a new billing or shipping address for a given customer.\nThe request body must contain a `type` attribute that should be set to either `billing` or `shipping`. The request body must also contain a `user_id`, `contact_name`, `addr1`, `addr2`, `city`, `county`, `postcode` and `country_code` attributes.\n\nIf called with `RoleCustomer` privileges the `user_id` in the request body must match that of the JWT. That is, `RoleCustomer` authenticated callers can only create addreses for themselves and not other customers. `RoleAdmin` has no such restriction.\n\nThe `country_code` attribute value must be set to an ISO 3166 two character country code.\n\nOpCreateAddress requires `RoleCustomer` privileges. The\n",
         "operationId": "OpCreateAddress",
         "tags": [
           "Addresses"
@@ -1683,6 +2004,18 @@
         }
       },
       "get": {
+        "parameters": [
+          {
+            "name": "user_id",
+            "required": true,
+            "in": "query",
+            "description": "A unique identifier for the user",
+            "schema": {
+              "type": "string",
+              "example": "d31bb101-8e44-49f0-86fd-0d4962140687"
+            }
+          }
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1700,10 +2033,34 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Address"
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Address"
+                      }
+                    }
                   }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 404,
+                  "code": "users/user-not-found",
+                  "message": "user not found"
                 }
               }
             }
@@ -1740,7 +2097,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AddressRequest"
+                "$ref": "#/components/schemas/AddressUpdateRequest"
               }
             }
           }
@@ -1755,6 +2112,21 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 404,
+                  "code": "addresses/address-not-found",
+                  "message": "address not found"
+                }
+              }
+            }
           }
         }
       },
@@ -1765,7 +2137,7 @@
           }
         ],
         "summary": "Get an address object",
-        "description": "OpGetAddress requires `RoleCustomer` privileges.\n",
+        "description": "OpGetAddress requires `RoleCustomer` privileges. The id of the address must also match the customer id in the caller's JWT - that is you can only retrieve your own addresses.\n",
         "operationId": "OpGetAddress",
         "tags": [
           "Addresses"
@@ -1777,6 +2149,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 404,
+                  "code": "addresses/address-not-found",
+                  "message": "address not found"
                 }
               }
             }
@@ -1798,6 +2185,21 @@
         "responses": {
           "204": {
             "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 404,
+                  "code": "addresses/address-not-found",
+                  "message": "address not found"
+                }
+              }
+            }
           }
         }
       }
@@ -1989,20 +2391,7 @@
         }
       }
     },
-    "/products/{id}/images": {
-      "parameters": [
-        {
-          "name": "id",
-          "required": true,
-          "in": "path",
-          "description": "A unique identifier for the product.",
-          "schema": {
-            "type": "string",
-            "format": "uuid",
-            "example": "d9da65ce-6f2c-42ae-8789-448f3053b185"
-          }
-        }
-      ],
+    "/images": {
       "post": {
         "security": [
           {
@@ -2010,7 +2399,7 @@
           }
         ],
         "summary": "Add an image to a product",
-        "description": "OpAddImage requires `RoleAdmin` privileges.\n",
+        "description": "Create a new image reference by passing the `product_id` and `path` attributes in the request body.\n\nOpAddImage requires `RoleAdmin` privileges.\n",
         "operationId": "OpAddImage",
         "tags": [
           "Images"
@@ -2019,7 +2408,20 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ImageRequest"
+                "required": [
+                  "path"
+                ],
+                "properties": {
+                  "product_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "8c65b9ad-5141-4065-83ba-0eb97c15dc07"
+                  },
+                  "path": {
+                    "type": "string",
+                    "example": "images/products/front-view.jpg"
+                  }
+                }
               }
             }
           }
@@ -2038,13 +2440,26 @@
         }
       },
       "get": {
+        "parameters": [
+          {
+            "name": "product_id",
+            "required": true,
+            "in": "query",
+            "description": "A unique identifier for the product.",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "8c65b9ad-5141-4065-83ba-0eb97c15dc07"
+            }
+          }
+        ],
         "security": [
           {
             "bearerAuth": []
           }
         ],
-        "summary": "List product images",
-        "description": "OpListProductImages requires `RoleShopper` privileges.\n",
+        "summary": "List images for a given product",
+        "description": "Retrieves a list of image objects for a given product. You must pass the `product_id` as a query parameter.\n\nOpListProductImages requires `RoleShopper` privileges.\n",
         "operationId": "OpListProductImages",
         "tags": [
           "Images"
@@ -3068,6 +3483,523 @@
         }
       }
     },
+    "/shipping-tariffs": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create a new shipping tariff",
+        "description": "Attempt to create a new shipping tarrif. The request body must contain `country_code`, `shipping_code`, `name`, `price` and `tax_code` attributes.\n\nOpCreateShippingTariff requires `RoleAdmin` privileges or higher.\n",
+        "operationId": "OpCreateShippingTariff",
+        "tags": [
+          "Shipping Tariffs"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "country_code",
+                  "shipping_code",
+                  "name",
+                  "price",
+                  "tax_code"
+                ],
+                "properties": {
+                  "country_code": {
+                    "type": "string",
+                    "example": "GB"
+                  },
+                  "shipping_code": {
+                    "type": "string",
+                    "example": "NEXTDAY-SPECIAL"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "Next day special delivery"
+                  },
+                  "price": {
+                    "type": "integer",
+                    "example": 99500
+                  },
+                  "tax_code": {
+                    "type": "string",
+                    "example": "T20"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "shipping_tariff object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShippingTariff"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 404,
+                  "code": "shipping-tariffs/shipping-tariff-code-exists",
+                  "message": "shipping tariff code already exists"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get a list of all shipping tariffs",
+        "description": "Retrieves a complete list of shipping_tariff objects.\n\nOpListShippingTariffs requires `RoleShopper` privileges or higher.\n",
+        "operationId": "OpListShippingTariffs",
+        "tags": [
+          "Shipping Tariffs"
+        ],
+        "responses": {
+          "200": {
+            "description": "list of shipping_tariff objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ShippingTariff"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shipping-tariffs/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "required": true,
+          "in": "path",
+          "description": "A unique identifier for the price list.",
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "32e6a6ce-ed1b-4304-a749-6aa474150950"
+          }
+        }
+      ],
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get a single shipping tariff by id",
+        "description": "OpGetShippingTariff requires `RoleAdmin` privileges or higher.\n",
+        "operationId": "OpGetShippingTariff",
+        "tags": [
+          "Shipping Tariffs"
+        ],
+        "responses": {
+          "200": {
+            "description": "shipping_tariff object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShippingTariff"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 404,
+                  "code": "shipping-tariffs/shipping-tariff-not-found",
+                  "message": "shipping tariff not found"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update a shipping tariff",
+        "description": "Attempt to update all the details of a shipping tariff. `country_code`, `shipping_code`, `name`, `price` and `tax_price` attributes must all be passed..\n\nOpUpdateShippingTariff requires `RoleAdmin` privileges or higher.\n",
+        "operationId": "OpUpdateShippingTariff",
+        "tags": [
+          "Shipping Tariffs"
+        ],
+        "requestBody": {
+          "description": "Shipping Tariff details to update",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "country_code",
+                  "shipping_code",
+                  "name",
+                  "price",
+                  "tax_code"
+                ],
+                "properties": {
+                  "country_code": {
+                    "type": "string",
+                    "example": "GB"
+                  },
+                  "shipping_code": {
+                    "type": "string",
+                    "example": "NEXTDAY-SPECIAL"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "New name"
+                  },
+                  "price": {
+                    "type": "integer",
+                    "example": 129500
+                  },
+                  "tax_code": {
+                    "type": "string",
+                    "example": "T0"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "shipping_tariff object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShippingTariff"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 404,
+                  "code": "shipping-tariffs/shipping-tariff-not-found",
+                  "message": "shipping tariff not found"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 404,
+                  "code": "shipping-tariffs/shipping-tariff-code-exists",
+                  "message": "shipping tariff code already exists"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete a shipping tariff by id",
+        "description": "Attempts to delete a shipping tariff identified by the given id.\n\nOpDeleteShippingTariff requires `RoleAdmin` privileges or higher.\n",
+        "operationId": "OpDeleteShippingTariff",
+        "tags": [
+          "Shipping Tariffs"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 404,
+                  "code": "shipping-tariffs/shipping-tariff-not-found",
+                  "message": "shipping tariff not found"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inventory": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get a list of all invetory objects",
+        "description": "Retrieves a list of all inventory objects.\n\nOpListInventory requires `RoleShopper` privileges.\n",
+        "operationId": "OpListInventory",
+        "tags": [
+          "Inventory"
+        ],
+        "responses": {
+          "200": {
+            "description": "list of inventory objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Inventory"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inventory/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "required": true,
+          "in": "path",
+          "description": "A unique identifier for the inventory object.",
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "5659fec5-afd1-44a0-bf40-71d63067fd36"
+          }
+        }
+      ],
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get a single inventory object by id",
+        "description": "Retrieves a single inventory object by id.\n\nOpGetInventory requires `RoleShopper` privileges.\n",
+        "operationId": "OpGetInventory",
+        "tags": [
+          "Inventory"
+        ],
+        "responses": {
+          "200": {
+            "description": "inventory object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Inventory"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "inventory/inventory-not-found": {
+                    "summary": "inventory/inventory-not-found",
+                    "value": {
+                      "status": 404,
+                      "code": "inventory/inventory-not-found",
+                      "message": "inventory not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update a single inventory object",
+        "description": "Partially updates a single inventory object by id. The request body accepts `onhand` (a positive integer or zero) and `overselling` a boolean value.\n\nIf `overselling` is set to true there will be no restriction on the number of items that can be added to the shopping cart and placed in an order.\n\n`OpUpdateInventory` requires `RoleAdmin` privileges or higher.\n",
+        "operationId": "OpUpdateInventory",
+        "tags": [
+          "Inventory"
+        ],
+        "requestBody": {
+          "description": "Order to place in the system",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "onhand": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 99999,
+                    "example": 50
+                  },
+                  "overselling": {
+                    "type": "boolean",
+                    "example": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "inventory object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Inventory"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "inventory/inventory-not-found": {
+                    "summary": "inventory/inventory-not-found",
+                    "value": {
+                      "status": 404,
+                      "code": "inventory/inventory-not-found",
+                      "message": "inventory not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inventory:batch-update": {
+      "patch": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Batch update inventory",
+        "description": "OpBatchUpdateInventory requires `RoleAdmin` privileges or higher.\n",
+        "operationId": "OpBatchUpdateInventory",
+        "tags": [
+          "Inventory"
+        ],
+        "requestBody": {
+          "description": "list of inventory to update",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "list of inventory objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Inventory"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/orders": {
       "post": {
         "security": [
@@ -3087,7 +4019,35 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OrderRequest"
+                "type": "object",
+                "required": [
+                  "cart_id",
+                  "customer",
+                  "billing_address",
+                  "shipping_address"
+                ],
+                "properties": {
+                  "cart_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "33ed8b80-3ba7-4f31-9364-2559a83258a7"
+                  },
+                  "contact_name": {
+                    "type": "string",
+                    "example": "John Doe"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "john@example.com"
+                  },
+                  "billing_address": {
+                    "$ref": "#/components/schemas/OrderAddressRequest"
+                  },
+                  "shipping_address": {
+                    "$ref": "#/components/schemas/OrderAddressRequest"
+                  }
+                }
               }
             }
           }
@@ -3542,6 +4502,7 @@
         "type": "object",
         "required": [
           "name",
+          "promo_rule_code",
           "amount",
           "type",
           "target"
@@ -3550,6 +4511,10 @@
           "name": {
             "type": "string",
             "example": "Summer specials"
+          },
+          "promo_rule_code": {
+            "type": "string",
+            "example": "SUMMERSALE20"
           },
           "start_at": {
             "type": "string",
@@ -3642,6 +4607,62 @@
               "shipping"
             ],
             "example": "category"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-10-15 16:15:00.810399Z"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-10-15 16:15:00.810399Z"
+          }
+        }
+      },
+      "Coupon": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "example": "coupon"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "test"
+          },
+          "coupon_code": {
+            "type": "string",
+            "example": "SALE20"
+          },
+          "promo_rule_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "d54aa60b-a2b7-4f18-b4e2-5c410bd1e263"
+          },
+          "void": {
+            "type": "boolean",
+            "example": false
+          },
+          "reusable": {
+            "type": "boolean",
+            "example": true
+          },
+          "spend_count": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 5
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-10-15 16:15:00.810399Z"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-10-15 16:15:00.810399Z"
           }
         }
       },
@@ -3686,15 +4707,23 @@
           }
         }
       },
-      "CustomerRequest": {
+      "UserRequest": {
         "type": "object",
         "required": [
+          "role",
           "email",
           "password",
           "firstname",
           "lastname"
         ],
         "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "customer",
+              "admin"
+            ]
+          },
           "email": {
             "type": "string",
             "format": "email",
@@ -3714,12 +4743,12 @@
           }
         }
       },
-      "Customer": {
+      "User": {
         "type": "object",
         "properties": {
           "object": {
             "type": "string",
-            "example": "customer"
+            "example": "user"
           },
           "id": {
             "type": "string",
@@ -3727,11 +4756,21 @@
             "example": "53b3384b-fc35-47d1-9054-6b81f30f382e"
           },
           "uid": {
-            "type": "string"
+            "type": "string",
+            "example": "eocNauyyf3WchJG6WRWXePEqbTE2"
           },
           "role": {
             "type": "string",
-            "example": "eocNauyyf3WchJG6WRWXePEqbTE2"
+            "enum": [
+              "customer",
+              "admin"
+            ],
+            "example": "customer"
+          },
+          "price_list_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "9f0fb310-6fac-4a06-9438-ca1c2f8bee7b"
           },
           "email": {
             "type": "string",
@@ -3758,7 +4797,7 @@
           }
         }
       },
-      "DevKey": {
+      "DeveloperKey": {
         "type": "object",
         "properties": {
           "object": {
@@ -3769,12 +4808,13 @@
             "type": "string",
             "example": "5a85466e-9f23-4d71-b8b7-adbfc479bb6c"
           },
-          "key": {
-            "type": "string"
-          },
-          "customer_id": {
+          "user_id": {
             "type": "string",
             "example": "5a85466e-9f23-4d71-b8b7-adbfc479bb6c"
+          },
+          "key": {
+            "type": "string",
+            "example": "2Z1uUw7Vo81sHneDKfkbUTfNoQ2UXLEkrd5224tapmK1"
           },
           "created": {
             "type": "string",
@@ -3853,38 +4893,83 @@
           }
         }
       },
-      "OrderRequest": {
-        "type": "object",
+      "BatchUpdateRequest": {
         "required": [
-          "customer",
-          "billing_address",
-          "shipping_address"
+          "object",
+          "data"
         ],
         "properties": {
-          "cart_id": {
+          "object": {
             "type": "string",
-            "format": "uuid",
-            "example": "33ed8b80-3ba7-4f31-9364-2559a83258a7"
+            "example": "list"
           },
-          "customer": {
-            "type": "object",
-            "properties": {
-              "contact_name": {
-                "type": "string",
-                "example": "John Doe"
-              },
-              "email": {
-                "type": "string",
-                "format": "email",
-                "example": "john@example.com"
+          "data": {
+            "type": "array",
+            "items": {
+              "required": [
+                "product_id"
+              ],
+              "properties": {
+                "product_id": {
+                  "type": "string",
+                  "example": "3479242b-7e4f-4d2b-9cab-1ea6cb5bee40"
+                },
+                "onhand": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 99999,
+                  "example": 40
+                },
+                "overselling": {
+                  "type": "boolean",
+                  "example": true
+                }
               }
             }
+          }
+        }
+      },
+      "Inventory": {
+        "properties": {
+          "object": {
+            "type": "string",
+            "example": "inventory"
           },
-          "billing_address": {
-            "$ref": "#/components/schemas/AddressRequest"
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "5659fec5-afd1-44a0-bf40-71d63067fd36"
           },
-          "shipping_address": {
-            "$ref": "#/components/schemas/AddressRequest"
+          "product_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "b3d23452-95b7-46e2-902d-721a5c21f680"
+          },
+          "product_path": {
+            "type": "string",
+            "example": "quad-processor-split-screen-cctv-system"
+          },
+          "product_sku": {
+            "type": "string",
+            "example": "QUAD01"
+          },
+          "onhand": {
+            "type": "integer",
+            "example": 50
+          },
+          "overselling": {
+            "type": "boolean",
+            "example": true
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-10-01 16:53:24.590938Z"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-10-01 16:53:24.590938Z"
           }
         }
       },
@@ -3898,18 +4983,50 @@
           }
         }
       },
-      "AddressRequest": {
+      "AddressUpdateRequest": {
+        "properties": {
+          "contact_name": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "addr1": {
+            "type": "string",
+            "example": "456 The Road"
+          },
+          "addr2": {
+            "type": "string",
+            "example": "Park Lane"
+          },
+          "city": {
+            "type": "string",
+            "example": "Cambridge"
+          },
+          "county": {
+            "type": "string",
+            "example": "Cambridgeshire"
+          },
+          "postcode": {
+            "type": "string",
+            "example": "CB1 9ZZ"
+          },
+          "country_code": {
+            "type": "string",
+            "example": "GB"
+          }
+        }
+      },
+      "OrderAddressRequest": {
         "required": [
-          "typ",
+          "type",
           "contact_name",
           "addr1",
           "city",
           "county",
           "postcode",
-          "country"
+          "country_code"
         ],
         "properties": {
-          "typ": {
+          "type": {
             "type": "string",
             "enum": [
               "shipping",
@@ -3933,11 +5050,70 @@
             "type": "string",
             "example": "Cambridge"
           },
+          "county": {
+            "type": "string",
+            "example": "Cambridgeshire"
+          },
           "postcode": {
             "type": "string",
             "example": "CB1 9ZZ"
           },
-          "country": {
+          "country_code": {
+            "type": "string",
+            "example": "GB"
+          }
+        }
+      },
+      "AddressRequest": {
+        "required": [
+          "user_id",
+          "type",
+          "contact_name",
+          "addr1",
+          "city",
+          "county",
+          "postcode",
+          "country_code"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "d31bb101-8e44-49f0-86fd-0d4962140687"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "shipping",
+              "billing"
+            ],
+            "example": "billing"
+          },
+          "contact_name": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "addr1": {
+            "type": "string",
+            "example": "456 The Road"
+          },
+          "addr2": {
+            "type": "string",
+            "example": "Park Lane"
+          },
+          "city": {
+            "type": "string",
+            "example": "Cambridge"
+          },
+          "county": {
+            "type": "string",
+            "example": "Cambridgeshire"
+          },
+          "postcode": {
+            "type": "string",
+            "example": "CB1 9ZZ"
+          },
+          "country_code": {
             "type": "string",
             "example": "GB"
           }
@@ -3954,7 +5130,7 @@
             "format": "uuid",
             "example": "c7c9ff19-4bc9-4953-a1bd-9dee0b41b4fe"
           },
-          "typ": {
+          "type": {
             "type": "string",
             "enum": [
               "shipping",
@@ -3982,7 +5158,7 @@
             "type": "string",
             "example": "CB1 9ZZ"
           },
-          "country": {
+          "country_code": {
             "type": "string",
             "example": "GB"
           },
@@ -4062,6 +5238,56 @@
             "type": "string",
             "format": "date-time",
             "example": "2019-08-22T22:42:41.446412Z"
+          }
+        }
+      },
+      "Category": {
+        "properties": {
+          "object": {
+            "type": "string",
+            "example": "category"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "0c119e3e-2b0e-4ab9-888d-98d8f0f5dd0e"
+          },
+          "segment": {
+            "type": "string",
+            "example": "security-systems"
+          },
+          "path": {
+            "type": "string",
+            "example": "spy/shop-by-solution/security-systems"
+          },
+          "name": {
+            "type": "string",
+            "example": "Security Systems"
+          },
+          "lft": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 1
+          },
+          "rgt": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 120
+          },
+          "depth": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 0
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-10-16T13:57:52.699517Z"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-10-16T13:57:52.699517Z"
           }
         }
       },
@@ -4300,6 +5526,14 @@
             "format": "uuid",
             "example": "8782b771-e6d7-45f3-879a-2b9d3e8ba1c7"
           },
+          "product_path": {
+            "type": "string",
+            "example": "10-metre-power-cable-for-5v-cctv-camera-spycam"
+          },
+          "product_sku": {
+            "type": "string",
+            "example": "10M17POWER"
+          },
           "path": {
             "type": "string",
             "example": "4439.jpg"
@@ -4332,17 +5566,6 @@
             "type": "string",
             "format": "date-time",
             "example": "2019-07-30T14:31:47.672541Z"
-          }
-        }
-      },
-      "ImageRequest": {
-        "required": [
-          "path"
-        ],
-        "properties": {
-          "path": {
-            "type": "string",
-            "example": "images/products/namwa1.jpg"
           }
         }
       },
@@ -4460,6 +5683,49 @@
             "type": "string",
             "format": "date-time",
             "example": "2019-08-22T09:31:35.430Z"
+          }
+        }
+      },
+      "ShippingTariff": {
+        "properties": {
+          "object": {
+            "type": "string",
+            "example": "shipping_tariff"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "cf9ad33b-d0eb-4585-b4b7-0ef1355126fb"
+          },
+          "country_code": {
+            "type": "string",
+            "example": "GB"
+          },
+          "shipping_code": {
+            "type": "string",
+            "example": "NEXTDAY-ROYALMAIL"
+          },
+          "name": {
+            "type": "string",
+            "example": "Royal Mail Special Delivery"
+          },
+          "price": {
+            "type": "integer",
+            "example": 199500
+          },
+          "tax_code": {
+            "type": "string",
+            "example": "T20"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-10-15 16:15:00.810399Z"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2019-10-15 16:15:00.810399Z"
           }
         }
       },
@@ -4644,7 +5910,7 @@
         "properties": {
           "api_version": {
             "type": "string",
-            "example": "v0.60.1"
+            "example": "v0.61.0"
           },
           "env": {
             "type": "object",
@@ -4674,7 +5940,7 @@
                   },
                   "schema_version": {
                     "type": "string",
-                    "example": "v0.60.1"
+                    "example": "v0.61.0"
                   }
                 }
               },
