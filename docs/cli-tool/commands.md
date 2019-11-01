@@ -83,6 +83,31 @@ Spy
 Purges the existing catalog. You must purge the associations first before running this command. See the [assocs purge](#assocs-purge) command.
 
 
+## Webhooks
+
+### webhooks [command]
+The `webhooks` group of commands are used to manage webhooks. Use the appropriate subcommand [webhooks create](#webhooks-create) to create a new webhook, [webhooks list](#webhooks-list) to list all webhooks, [webhooks get](#webhooks-get) to get details of an individual webhook, [webhooks update](#webhooks-update) to change the url, events or enabled flag of a webhook, or [webhooks delete](#webhook-delete) to delete a webhook.
+
+``` bash
+$ ecom webhooks
+Webhooks Management
+
+Usage:
+  ecom webhooks [command]
+
+Available Commands:
+  create      Create a webhook
+  delete      Delete webhook
+  get         Get a webhook
+  list        list webhooks
+  update      Get a webhook
+
+Flags:
+  -h, --help   help for webhooks
+
+Use "ecom webhooks [command] --help" for more information about a command.
+```
+
 ## Associations
 
 
@@ -191,25 +216,25 @@ This command is useful for administrators that wish to check the ecom system is 
 
 ``` bash
 $ ecom sysinfo
-API Service                                                       
------------                                                       
+API Service
+-----------
 Version      v0.34.1
-                                                                  
-Postgres                                                          
---------                                                          
-Host         /cloudsql/open247-gae:europe-west2:open247-postgres  
-Port         5432                                                 
-Database     ecom_dev                                             
-User         postgres                                             
-SSLMode      disable                                              
-                                                                  
-Google                                                            
-------                                                            
-Project ID   test-data-spycameracctv                              
-Web API Key  AIzaSyBGU4AnEHCOXKGkOtwXWyxOBaU3VSTg6wY              
-                                                                  
-App                                                               
----                                                               
-HTTP Port    8081                                                 
+
+Postgres
+--------
+Host         /cloudsql/open247-gae:europe-west2:open247-postgres
+Port         5432
+Database     ecom_dev
+User         postgres
+SSLMode      disable
+
+Google
+------
+Project ID   test-data-spycameracctv
+Web API Key  AIzaSyBGU4AnEHCOXKGkOtwXWyxOBaU3VSTg6wY
+
+App
+---
+HTTP Port    8081
 Root Email   andy+root@andyfusniak.com
 ```
